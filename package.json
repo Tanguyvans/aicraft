@@ -7,13 +7,13 @@
     "ai",
     "utilities"
   ],
-  "homepage": "https://github.com/yourusername/aicraft",
+  "homepage": "https://github.com/Tanguyvans/aicraft",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/aicraft.git"
+    "url": "git+https://github.com/Tanguyvans/aicraft.git"
   },
   "license": "MIT",
-  "author": "Your Name",
+  "author": "Tanguy Vansnick",
   "type": "module",
   "exports": {
     ".": {

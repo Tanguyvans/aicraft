@@ -1,0 +1,49 @@
+{
+  "name": "aicraft",
+  "version": "0.0.1",
+  "description": "A TypeScript npm package for AI crafting utilities",
+  "keywords": [
+    "typescript",
+    "ai",
+    "utilities"
+  ],
+  "homepage": "https://github.com/yourusername/aicraft",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/aicraft.git"
+  },
+  "license": "MIT",
+  "author": "Your Name",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.6",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

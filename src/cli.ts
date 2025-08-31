@@ -20,6 +20,23 @@ interface Agent {
   model?: string;
   color?: string;
   tags: string[];
+  mcps?: string[];
+}
+
+interface McpServer {
+  name: string;
+  description: string;
+  type: string;
+  command: string;
+  args: string[];
+  env: Record<string, string>;
+  category: string;
+  tags: string[];
+}
+
+interface McpRegistry {
+  version: string;
+  mcpServers: Record<string, McpServer>;
 }
 
 interface LocalConfig {
@@ -61,7 +78,8 @@ async function getRegistry(): Promise<Agent[]> {
             description: data.description || '',
             model: data.model,
             color: data.color,
-            tags: data.tags || []
+            tags: data.tags || [],
+            mcps: data.mcps || []
           });
         }
       }
@@ -100,6 +118,56 @@ async function saveLocalConfig(config: LocalConfig): Promise<void> {
   await fs.writeJson(configPath, config, { spaces: 2 });
 }
 
+async function getMcpRegistry(): Promise<McpRegistry> {
+  try {
+    const agentsDir = path.join(__dirname, '..', 'agents');
+    const mcpRegistryPath = path.join(agentsDir, 'mcp-registry.json');
+    
+    if (await fs.pathExists(mcpRegistryPath)) {
+      return await fs.readJson(mcpRegistryPath);
+    }
+    
+    return { version: '1.0.0', mcpServers: {} };
+  } catch (error) {
+    console.error(chalk.red('Failed to load MCP registry:'), error);
+    return { version: '1.0.0', mcpServers: {} };
+  }
+}
+
+async function installMcps(mcpNames: string[]): Promise<void> {
+  if (!mcpNames || mcpNames.length === 0) return;
+  
+  const mcpRegistry = await getMcpRegistry();
+  const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+  
+  // Read existing MCP config or create new one
+  let existingConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
+  
+  try {
+    if (await fs.pathExists(mcpConfigPath)) {
+      existingConfig = await fs.readJson(mcpConfigPath);
+    }
+  } catch (error) {
+    // Config doesn't exist or is invalid
+  }
+  
+  // Add new MCP servers
+  for (const mcpName of mcpNames) {
+    const mcpServer = mcpRegistry.mcpServers[mcpName];
+    if (mcpServer) {
+      existingConfig.mcpServers[mcpName] = {
+        type: mcpServer.type,
+        command: mcpServer.command,
+        args: mcpServer.args,
+        env: mcpServer.env
+      };
+    }
+  }
+  
+  // Save updated config
+  await fs.writeJson(mcpConfigPath, existingConfig, { spaces: 2 });
+}
+
 async function listAgents() {
   const spinner = ora('Loading available agents...').start();
   const agents = await getRegistry();
@@ -126,6 +194,9 @@ async function listAgents() {
     console.log(`    ${chalk.gray(agent.description)}`);
     if (agent.model) {
       console.log(`    ${chalk.dim('Model:')} ${agent.model}`);
+    }
+    if (agent.mcps && agent.mcps.length > 0) {
+      console.log(`    ${chalk.dim('MCPs:')} ${agent.mcps.map((mcp: string) => chalk.magenta(mcp)).join(', ')}`);
     }
     if (agent.tags && agent.tags.length > 0) {
       console.log(`    ${chalk.dim('Tags:')} ${agent.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`);
@@ -207,6 +278,13 @@ async function installAgent(agentName?: string) {
       throw new Error(`Agent file not found: ${selectedAgent.filename}`);
     }
     
+    // Install MCP dependencies if the agent has any
+    if (selectedAgent.mcps && selectedAgent.mcps.length > 0) {
+      downloadSpinner.text = `Installing MCP dependencies for ${selectedAgent.name}...`;
+      await installMcps(selectedAgent.mcps);
+      console.log(chalk.green(`✓ Installed MCP servers: ${selectedAgent.mcps.join(', ')}`));
+    }
+    
     // Update local config
     const updatedConfig = await getLocalConfig();
     updatedConfig.installedAgents = updatedConfig.installedAgents.filter(a => a.name !== selectedAgent.name);
@@ -219,6 +297,9 @@ async function installAgent(agentName?: string) {
     
     downloadSpinner.succeed(chalk.green(`✓ Agent "${selectedAgent.name}" installed successfully!`));
     console.log(chalk.dim(`Location: ${agentPath}`));
+    if (selectedAgent.mcps && selectedAgent.mcps.length > 0) {
+      console.log(chalk.dim(`MCPs: ${selectedAgent.mcps.join(', ')}`));
+    }
   } catch (error) {
     downloadSpinner.fail(chalk.red(`Failed to install agent "${selectedAgent.name}"`));
     console.error(error);

@@ -1,11 +1,13 @@
 {
   "name": "aicraft",
   "version": "0.0.1",
-  "description": "A TypeScript npm package for AI crafting utilities",
+  "description": "AI Agent Package Manager for Claude - Install and manage AI agents",
   "keywords": [
-    "typescript",
     "ai",
-    "utilities"
+    "claude",
+    "agents",
+    "cli",
+    "typescript"
   ],
   "homepage": "https://github.com/Tanguyvans/aicraft",
   "repository": {
@@ -15,6 +17,9 @@
   "license": "MIT",
   "author": "Tanguy Vansnick",
   "type": "module",
+  "bin": {
+    "aicraft": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,7 +29,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "agents"
   ],
   "scripts": {
     "build": "tsc",
@@ -33,17 +39,25 @@
     "test:run": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "npm run build && changeset publish"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.6",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.9",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "chalk": "^5.6.0",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.1",
+    "gray-matter": "^4.0.3",
+    "inquirer": "^12.9.4",
+    "ora": "^8.2.0"
   }
 }

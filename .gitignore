@@ -8,3 +8,14 @@ coverage
 .idea
 *.swp
 *.swo
+
+# Local development files
+.aicraft/
+.claude/
+
+# Test files
+test-agents/
+
+# Temporary files
+*.tmp
+*.temp

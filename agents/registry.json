@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "agents": [
+    {
+      "name": "shadcn-ui-expert",
+      "filename": "shadcn-ui-expert.md",
+      "description": "Build and modify user interfaces using shadcn/ui components and blocks",
+      "model": "sonnet",
+      "color": "green",
+      "tags": ["ui", "shadcn", "react", "typescript", "tailwind"]
+    }
+  ]
+}

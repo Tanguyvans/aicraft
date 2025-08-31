@@ -1,24 +1,59 @@
 # AICraft
 
-A TypeScript npm package for AI crafting utilities.
+AI Agent Package Manager for Claude - Install and manage AI agents for your Claude projects.
 
-## Installation
+## Features
+
+- 📦 **Agent Registry**: Browse and install curated AI agents
+- 🎯 **Claude Integration**: Agents install directly to `.claude/agents/`
+- ✨ **Interactive CLI**: Easy-to-use commands for managing agents
+- 🔧 **Agent Creation**: Create and share your own agents
+- 🏷️ **Frontmatter Format**: Simple markdown format with metadata
+
+## Quick Start
+
+Install an agent directly:
 
 ```bash
-npm install aicraft
+npx aicraft install shadcn-ui-expert
 ```
 
-## Usage
+Or use the interactive CLI:
 
-```typescript
-import { add, multiply, greet } from 'aicraft';
+```bash
+npx aicraft
+```
 
-// Math functions
-console.log(add(2, 3)); // 5
-console.log(multiply(3, 4)); // 12
+## Available Agents
 
-// String functions
-console.log(greet('World')); // Hello, World!
+- **shadcn-ui-expert**: Build and modify user interfaces using shadcn/ui components and blocks
+
+## Commands
+
+```bash
+npx aicraft                    # Interactive menu
+npx aicraft list               # List all available agents
+npx aicraft install <agent>    # Install a specific agent
+npx aicraft create             # Create a new agent
+npx aicraft installed          # Show installed agents
+```
+
+## Agent Format
+
+Agents are markdown files with frontmatter:
+
+```markdown
+---
+name: my-agent
+description: Agent description
+model: sonnet
+color: green
+tags: ["tag1", "tag2"]
+---
+
+# My Agent
+
+Agent instructions and system prompt go here...
 ```
 
 ## Development

@@ -363,7 +363,8 @@ async function showInstalledAgents() {
 program
   .name('aicraft')
   .description('AI Agent Package Manager for Claude')
-  .version('0.0.1');
+  .version('0.1.0')
+  .option('-l, --list', 'List all available agents');
 
 program
   .command('list')
@@ -389,8 +390,14 @@ program
   .description('Show installed agents')
   .action(showInstalledAgents);
 
-// Default action - show interactive menu
-program.action(async () => {
+// Default action - show interactive menu or handle global options
+program.action(async (options) => {
+  // Handle global --list option
+  if (options.list) {
+    await listAgents();
+    return;
+  }
+  
   console.log(chalk.cyan.bold('\n🤖 AICraft - AI Agent Manager\n'));
   
   const { action } = await inquirer.prompt([

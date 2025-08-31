@@ -138,7 +138,7 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   if (!mcpNames || mcpNames.length === 0) return;
   
   const mcpRegistry = await getMcpRegistry();
-  const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+  const mcpConfigPath = path.join(process.cwd(), '.claude', 'mcp.json');
   
   // Read existing MCP config or create new one
   let existingConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
@@ -165,6 +165,7 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   }
   
   // Save updated config
+  await fs.ensureDir(path.dirname(mcpConfigPath));
   await fs.writeJson(mcpConfigPath, existingConfig, { spaces: 2 });
 }
 

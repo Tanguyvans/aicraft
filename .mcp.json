@@ -1,10 +1,25 @@
 {
   "mcpServers": {
-    "elevenlabs": {
-      "command": "/Users/tanguyvans/.local/bin/uvx",
-      "args": ["elevenlabs-mcp"],
+    "shadcn-components": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@jpisnice/shadcn-ui-mcp-server",
+        "--github-api-key",
+        "${GITHUB_API_KEY}"
+      ],
+      "env": {}
+    },
+    "shadcn-themes": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "shadcn@canary",
+        "registry:mcp"
+      ],
       "env": {
-        "ELEVENLABS_API_KEY": "sk_59a2f2a7ff0f784e428b290055cc419c9080308c475aeb72"
+        "REGISTRY_URL": "https://tweakcn.com/r/themes/registry.json"
       }
     }
   }

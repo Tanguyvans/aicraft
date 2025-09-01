@@ -138,7 +138,7 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   if (!mcpNames || mcpNames.length === 0) return;
   
   const mcpRegistry = await getMcpRegistry();
-  const mcpConfigPath = path.join(process.cwd(), '.claude', 'mcp.json');
+  const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
   
   // Read existing MCP config or create new one
   let existingConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
@@ -165,8 +165,41 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   }
   
   // Save updated config
-  await fs.ensureDir(path.dirname(mcpConfigPath));
   await fs.writeJson(mcpConfigPath, existingConfig, { spaces: 2 });
+  
+  // Update Claude settings to enable the new MCP servers
+  await updateClaudeSettings(mcpNames);
+}
+
+async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
+  const settingsPath = path.join(process.cwd(), '.claude', 'settings.local.json');
+  
+  let settings = {
+    enabledMcpjsonServers: [] as string[],
+    enableAllProjectMcpServers: true
+  };
+  
+  try {
+    if (await fs.pathExists(settingsPath)) {
+      settings = await fs.readJson(settingsPath);
+    }
+  } catch (error) {
+    // Settings file doesn't exist or is invalid
+  }
+  
+  // Add new MCP servers to enabled list
+  for (const mcpName of mcpNames) {
+    if (!settings.enabledMcpjsonServers.includes(mcpName)) {
+      settings.enabledMcpjsonServers.push(mcpName);
+    }
+  }
+  
+  // Ensure enableAllProjectMcpServers is set
+  settings.enableAllProjectMcpServers = true;
+  
+  // Save updated settings
+  await fs.ensureDir(path.dirname(settingsPath));
+  await fs.writeJson(settingsPath, settings, { spaces: 2 });
 }
 
 async function listAgents() {

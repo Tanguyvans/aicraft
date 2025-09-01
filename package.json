@@ -1,6 +1,6 @@
 {
   "name": "aicraft",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "AI Agent Package Manager for Claude - Install and manage AI agents",
   "keywords": [
     "ai",

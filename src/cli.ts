@@ -268,6 +268,9 @@ function getAgentDescription(agentName: string): string {
       'building and modifying user interfaces using shadcn/ui components and blocks',
     'neo4j-expert':
       'Neo4j graph databases, Cypher queries, data modeling, and performance optimization',
+    'api-designer': 'designing, architecting, and optimizing REST and GraphQL APIs',
+    'docker-expert': 'containerizing applications and designing container orchestration strategies',
+    'react-architect': 'designing and optimizing React applications with modern patterns and Next.js',
   };
   return descriptions[agentName] || 'specialized tasks';
 }
@@ -276,6 +279,9 @@ function getAgentMcps(agentName: string): string[] {
   const mcpMap: Record<string, string[]> = {
     'shadcn-ui-expert': ['shadcn-components', 'shadcn-themes'],
     'neo4j-expert': ['neo4j-database'],
+    'api-designer': [],
+    'docker-expert': [],
+    'react-architect': [],
   };
   return mcpMap[agentName] || [];
 }

@@ -18,6 +18,33 @@
       "color": "blue",
       "tags": ["database", "graph", "cypher", "neo4j", "performance"],
       "mcps": ["neo4j-database"]
+    },
+    {
+      "name": "api-designer",
+      "filename": "api-designer.md",
+      "description": "Design, architect, and optimize REST and GraphQL APIs with modern best practices",
+      "model": "sonnet",
+      "color": "orange",
+      "tags": ["api", "rest", "graphql", "openapi", "architecture", "design"],
+      "mcps": []
+    },
+    {
+      "name": "docker-expert",
+      "filename": "docker-expert.md", 
+      "description": "Containerize applications and design container orchestration strategies",
+      "model": "sonnet",
+      "color": "blue",
+      "tags": ["docker", "containers", "kubernetes", "devops", "orchestration", "deployment"],
+      "mcps": []
+    },
+    {
+      "name": "react-architect",
+      "filename": "react-architect.md",
+      "description": "Design and optimize React applications with modern patterns and Next.js",
+      "model": "sonnet", 
+      "color": "cyan",
+      "tags": ["react", "nextjs", "vite", "typescript", "architecture", "hooks", "performance"],
+      "mcps": []
     }
   ]
 }

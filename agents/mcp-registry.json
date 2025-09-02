@@ -6,11 +6,7 @@
       "description": "Access shadcn/ui themes from the registry",
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "shadcn@canary",
-        "registry:mcp"
-      ],
+      "args": ["-y", "shadcn@canary", "registry:mcp"],
       "env": {
         "REGISTRY_URL": "https://tweakcn.com/r/themes/registry.json"
       },
@@ -22,11 +18,7 @@
       "description": "Access shadcn/ui components and documentation",
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "@jpisnice/shadcn-ui-mcp-server",
-        "--github-api-key",
-        "${GITHUB_API_KEY}"
-      ],
+      "args": ["@jpisnice/shadcn-ui-mcp-server", "--github-api-key", "${GITHUB_API_KEY}"],
       "env": {},
       "category": "UI/Design",
       "tags": ["shadcn", "components", "ui", "react"]
@@ -36,9 +28,7 @@
       "description": "Text-to-speech, speech-to-text, and AI voice tools",
       "type": "stdio",
       "command": "/Users/tanguyvans/.local/bin/uvx",
-      "args": [
-        "elevenlabs-mcp"
-      ],
+      "args": ["elevenlabs-mcp"],
       "env": {
         "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
       },
@@ -50,10 +40,7 @@
       "description": "Access to local filesystem operations",
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
       "env": {},
       "category": "System",
       "tags": ["filesystem", "files", "system"]
@@ -63,10 +50,7 @@
       "description": "Access GitHub repositories and APIs",
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       },
@@ -78,11 +62,7 @@
       "description": "Neo4j graph database operations with Cypher queries",
       "type": "stdio",
       "command": "uvx",
-      "args": [
-        "mcp-neo4j-cypher@0.3.1",
-        "--transport",
-        "stdio"
-      ],
+      "args": ["mcp-neo4j-cypher@0.3.1", "--transport", "stdio"],
       "env": {
         "NEO4J_URI": "${NEO4J_URI}",
         "NEO4J_USERNAME": "${NEO4J_USERNAME}",

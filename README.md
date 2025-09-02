@@ -48,7 +48,7 @@ name: my-agent
 description: Agent description
 model: sonnet
 color: green
-tags: ["tag1", "tag2"]
+tags: ['tag1', 'tag2']
 ---
 
 # My Agent

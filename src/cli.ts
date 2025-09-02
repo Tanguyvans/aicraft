@@ -55,22 +55,22 @@ async function getRegistry(): Promise<Agent[]> {
     // Read from local agents directory in the package
     const agentsDir = path.join(__dirname, '..', 'agents');
     const registryPath = path.join(agentsDir, 'registry.json');
-    
+
     if (await fs.pathExists(registryPath)) {
       const registry = await fs.readJson(registryPath);
       return registry.agents;
     }
-    
+
     // Fallback: scan directory for .md files
     if (await fs.pathExists(agentsDir)) {
       const files = await fs.readdir(agentsDir);
-      const agentFiles = files.filter(f => f.endsWith('.md'));
-      
+      const agentFiles = files.filter((f) => f.endsWith('.md'));
+
       const agents: Agent[] = [];
       for (const file of agentFiles) {
         const content = await fs.readFile(path.join(agentsDir, file), 'utf-8');
         const { data } = matter(content);
-        
+
         if (data.name) {
           agents.push({
             name: data.name,
@@ -79,13 +79,13 @@ async function getRegistry(): Promise<Agent[]> {
             model: data.model,
             color: data.color,
             tags: data.tags || [],
-            mcps: data.mcps || []
+            mcps: data.mcps || [],
           });
         }
       }
       return agents;
     }
-    
+
     return [];
   } catch (error) {
     console.error(chalk.red('Failed to load agent registry:'), error);
@@ -95,10 +95,10 @@ async function getRegistry(): Promise<Agent[]> {
 
 async function getLocalConfig(): Promise<LocalConfig> {
   const configPath = path.join(process.cwd(), '.aicraft', 'config.json');
-  
+
   const defaultConfig: LocalConfig = {
     installPath: '.claude/agents/',
-    installedAgents: []
+    installedAgents: [],
   };
 
   try {
@@ -108,7 +108,7 @@ async function getLocalConfig(): Promise<LocalConfig> {
   } catch (error) {
     // Config doesn't exist or is invalid
   }
-  
+
   return defaultConfig;
 }
 
@@ -122,11 +122,11 @@ async function getMcpRegistry(): Promise<McpRegistry> {
   try {
     const agentsDir = path.join(__dirname, '..', 'agents');
     const mcpRegistryPath = path.join(agentsDir, 'mcp-registry.json');
-    
+
     if (await fs.pathExists(mcpRegistryPath)) {
       return await fs.readJson(mcpRegistryPath);
     }
-    
+
     return { version: '1.0.0', mcpServers: {} };
   } catch (error) {
     console.error(chalk.red('Failed to load MCP registry:'), error);
@@ -136,13 +136,13 @@ async function getMcpRegistry(): Promise<McpRegistry> {
 
 async function installMcps(mcpNames: string[]): Promise<void> {
   if (!mcpNames || mcpNames.length === 0) return;
-  
+
   const mcpRegistry = await getMcpRegistry();
   const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
-  
+
   // Read existing MCP config or create new one
   let existingConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
-  
+
   try {
     if (await fs.pathExists(mcpConfigPath)) {
       existingConfig = await fs.readJson(mcpConfigPath);
@@ -150,7 +150,7 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   } catch (error) {
     // Config doesn't exist or is invalid
   }
-  
+
   // Add new MCP servers
   for (const mcpName of mcpNames) {
     const mcpServer = mcpRegistry.mcpServers[mcpName];
@@ -159,26 +159,26 @@ async function installMcps(mcpNames: string[]): Promise<void> {
         type: mcpServer.type,
         command: mcpServer.command,
         args: mcpServer.args,
-        env: mcpServer.env
+        env: mcpServer.env,
       };
     }
   }
-  
+
   // Save updated config
   await fs.writeJson(mcpConfigPath, existingConfig, { spaces: 2 });
-  
+
   // Update Claude settings to enable the new MCP servers
   await updateClaudeSettings(mcpNames);
 }
 
 async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   const settingsPath = path.join(process.cwd(), '.claude', 'settings.local.json');
-  
+
   let settings = {
     enabledMcpjsonServers: [] as string[],
-    enableAllProjectMcpServers: true
+    enableAllProjectMcpServers: true,
   };
-  
+
   try {
     if (await fs.pathExists(settingsPath)) {
       settings = await fs.readJson(settingsPath);
@@ -186,17 +186,17 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   } catch (error) {
     // Settings file doesn't exist or is invalid
   }
-  
+
   // Add new MCP servers to enabled list
   for (const mcpName of mcpNames) {
     if (!settings.enabledMcpjsonServers.includes(mcpName)) {
       settings.enabledMcpjsonServers.push(mcpName);
     }
   }
-  
+
   // Ensure enableAllProjectMcpServers is set
   settings.enableAllProjectMcpServers = true;
-  
+
   // Save updated settings
   await fs.ensureDir(path.dirname(settingsPath));
   await fs.writeJson(settingsPath, settings, { spaces: 2 });
@@ -205,16 +205,16 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
 async function manageClaudeFile(installedAgents: string[]): Promise<void> {
   const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
   const templatePath = path.join(__dirname, '..', 'agents', 'CLAUDE.md.template');
-  
+
   try {
     // Read the template
     const template = await fs.readFile(templatePath, 'utf-8');
-    
+
     // Get project info
     const packageJsonPath = path.join(process.cwd(), 'package.json');
     let projectName = path.basename(process.cwd());
     let projectDescription = 'Your project description here.';
-    
+
     if (await fs.pathExists(packageJsonPath)) {
       try {
         const packageJson = await fs.readJson(packageJsonPath);
@@ -224,32 +224,39 @@ async function manageClaudeFile(installedAgents: string[]): Promise<void> {
         // Use defaults if package.json can't be read
       }
     }
-    
+
     // Generate sub agents section
     const registry = await getMcpRegistry();
-    const subAgentsContent = installedAgents.map(agentName => {
-      const agent = agentName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-      const mcps = getAgentMcps(agentName);
-      return `### ${agentName}
+    const subAgentsContent = installedAgents
+      .map((agentName) => {
+        const agent = agentName.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+        const mcps = getAgentMcps(agentName);
+        return `### ${agentName}
 - **Usage**: Specialized in ${getAgentDescription(agentName)}
 - **MCPs**: ${mcps.join(', ') || 'None'}
 - **Context**: Always pass session context file \`.claude/tasks/context_session_x.md\`
 - **Follow-up**: Read agent documentation in \`.claude/doc/\` before implementation`;
-    }).join('\n\n');
-    
+      })
+      .join('\n\n');
+
     // Generate installed agents section
-    const installedAgentsContent = installedAgents.map(agent => `- **${agent}**: Installed`).join('\n');
-    
+    const installedAgentsContent = installedAgents
+      .map((agent) => `- **${agent}**: Installed`)
+      .join('\n');
+
     // Replace template variables
     let content = template
       .replace('{{PROJECT_NAME}}', projectName)
       .replace('{{PROJECT_DESCRIPTION}}', projectDescription)
-      .replace('{{SUB_AGENTS}}', subAgentsContent || 'No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.')
+      .replace(
+        '{{SUB_AGENTS}}',
+        subAgentsContent ||
+          'No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.'
+      )
       .replace('{{INSTALLED_AGENTS}}', installedAgentsContent || 'No agents installed yet.');
-    
+
     // Write or update CLAUDE.md
     await fs.writeFile(claudeFilePath, content);
-    
   } catch (error) {
     console.error(chalk.yellow('Warning: Could not manage CLAUDE.md file'), error);
   }
@@ -257,8 +264,10 @@ async function manageClaudeFile(installedAgents: string[]): Promise<void> {
 
 function getAgentDescription(agentName: string): string {
   const descriptions: Record<string, string> = {
-    'shadcn-ui-expert': 'building and modifying user interfaces using shadcn/ui components and blocks',
-    'neo4j-expert': 'Neo4j graph databases, Cypher queries, data modeling, and performance optimization'
+    'shadcn-ui-expert':
+      'building and modifying user interfaces using shadcn/ui components and blocks',
+    'neo4j-expert':
+      'Neo4j graph databases, Cypher queries, data modeling, and performance optimization',
   };
   return descriptions[agentName] || 'specialized tasks';
 }
@@ -266,7 +275,7 @@ function getAgentDescription(agentName: string): string {
 function getAgentMcps(agentName: string): string[] {
   const mcpMap: Record<string, string[]> = {
     'shadcn-ui-expert': ['shadcn-components', 'shadcn-themes'],
-    'neo4j-expert': ['neo4j-database']
+    'neo4j-expert': ['neo4j-database'],
   };
   return mcpMap[agentName] || [];
 }
@@ -282,15 +291,15 @@ async function listAgents() {
   }
 
   console.log(chalk.cyan('\n📦 Available Agents:\n'));
-  
-  agents.forEach(agent => {
+
+  agents.forEach((agent) => {
     const colorMap: Record<string, any> = {
       green: chalk.green,
       blue: chalk.blue,
       yellow: chalk.yellow,
       red: chalk.red,
       magenta: chalk.magenta,
-      cyan: chalk.cyan
+      cyan: chalk.cyan,
     };
     const color = agent.color && colorMap[agent.color] ? colorMap[agent.color] : chalk.green;
     console.log(`  ${color('•')} ${chalk.bold(agent.name)}`);
@@ -299,10 +308,14 @@ async function listAgents() {
       console.log(`    ${chalk.dim('Model:')} ${agent.model}`);
     }
     if (agent.mcps && agent.mcps.length > 0) {
-      console.log(`    ${chalk.dim('MCPs:')} ${agent.mcps.map((mcp: string) => chalk.magenta(mcp)).join(', ')}`);
+      console.log(
+        `    ${chalk.dim('MCPs:')} ${agent.mcps.map((mcp: string) => chalk.magenta(mcp)).join(', ')}`
+      );
     }
     if (agent.tags && agent.tags.length > 0) {
-      console.log(`    ${chalk.dim('Tags:')} ${agent.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`);
+      console.log(
+        `    ${chalk.dim('Tags:')} ${agent.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
+      );
     }
   });
 }
@@ -320,7 +333,7 @@ async function installAgent(agentName?: string) {
   let selectedAgent: Agent;
 
   if (agentName) {
-    const agent = agents.find(a => a.name === agentName);
+    const agent = agents.find((a) => a.name === agentName);
     if (!agent) {
       console.log(chalk.red(`Agent "${agentName}" not found`));
       return;
@@ -333,29 +346,29 @@ async function installAgent(agentName?: string) {
         type: 'list',
         name: 'agent',
         message: 'Select an agent to install:',
-        choices: agents.map(a => ({
+        choices: agents.map((a) => ({
           name: `${a.name} - ${a.description}`,
-          value: a
-        }))
-      }
+          value: a,
+        })),
+      },
     ]);
     selectedAgent = agent;
   }
 
   const config = await getLocalConfig();
-  
+
   // Check if already installed
-  const existing = config.installedAgents.find(a => a.name === selectedAgent.name);
+  const existing = config.installedAgents.find((a) => a.name === selectedAgent.name);
   if (existing) {
     const { overwrite } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'overwrite',
         message: `Agent "${selectedAgent.name}" is already installed. Overwrite?`,
-        default: false
-      }
+        default: false,
+      },
     ]);
-    
+
     if (!overwrite) {
       return;
     }
@@ -365,47 +378,49 @@ async function installAgent(agentName?: string) {
   const installPath = '.claude/agents/';
   const agentFileName = `${selectedAgent.name}.md`;
   const agentPath = path.join(process.cwd(), installPath, agentFileName);
-  
+
   const downloadSpinner = ora(`Installing ${selectedAgent.name}...`).start();
-  
+
   try {
     // Ensure directory exists
     await fs.ensureDir(path.dirname(agentPath));
-    
+
     // Copy agent file from package
     const sourceFile = path.join(__dirname, '..', 'agents', selectedAgent.filename);
-    
+
     if (await fs.pathExists(sourceFile)) {
       await fs.copyFile(sourceFile, agentPath);
     } else {
       throw new Error(`Agent file not found: ${selectedAgent.filename}`);
     }
-    
+
     // Install MCP dependencies if the agent has any
     if (selectedAgent.mcps && selectedAgent.mcps.length > 0) {
       downloadSpinner.text = `Installing MCP dependencies for ${selectedAgent.name}...`;
       await installMcps(selectedAgent.mcps);
       console.log(chalk.green(`✓ Installed MCP servers: ${selectedAgent.mcps.join(', ')}`));
     }
-    
+
     // Update local config
     const updatedConfig = await getLocalConfig();
-    updatedConfig.installedAgents = updatedConfig.installedAgents.filter(a => a.name !== selectedAgent.name);
+    updatedConfig.installedAgents = updatedConfig.installedAgents.filter(
+      (a) => a.name !== selectedAgent.name
+    );
     updatedConfig.installedAgents.push({
       name: selectedAgent.name,
       installedAt: new Date().toISOString(),
-      location: agentPath
+      location: agentPath,
     });
     await saveLocalConfig(updatedConfig);
-    
+
     downloadSpinner.succeed(chalk.green(`✓ Agent "${selectedAgent.name}" installed successfully!`));
     console.log(chalk.dim(`Location: ${agentPath}`));
     if (selectedAgent.mcps && selectedAgent.mcps.length > 0) {
       console.log(chalk.dim(`MCPs: ${selectedAgent.mcps.join(', ')}`));
     }
-    
+
     // Update CLAUDE.md with new agent
-    const currentlyInstalled = updatedConfig.installedAgents.map(a => a.name);
+    const currentlyInstalled = updatedConfig.installedAgents.map((a) => a.name);
     await manageClaudeFile(currentlyInstalled);
     console.log(chalk.green('✓ Updated CLAUDE.md with agent configuration'));
   } catch (error) {
@@ -416,15 +431,15 @@ async function installAgent(agentName?: string) {
 
 async function initProject() {
   console.log(chalk.cyan('🚀 Initialize AICraft Project\n'));
-  
+
   const spinner = ora('Creating CLAUDE.md...').start();
-  
+
   try {
     const config = await getLocalConfig();
-    const installedAgents = config.installedAgents.map(a => a.name);
-    
+    const installedAgents = config.installedAgents.map((a) => a.name);
+
     await manageClaudeFile(installedAgents);
-    
+
     spinner.succeed(chalk.green('✓ CLAUDE.md created successfully!'));
     console.log(chalk.dim('Location: ./CLAUDE.md'));
     console.log(chalk.yellow('\nNext steps:'));
@@ -439,50 +454,53 @@ async function initProject() {
 
 async function createAgent() {
   console.log(chalk.cyan('🚀 Create New Agent\n'));
-  
+
   const answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'name',
       message: 'Agent name:',
-      validate: (input) => /^[a-z0-9-]+$/.test(input) || 'Name must be lowercase with hyphens only'
+      validate: (input) => /^[a-z0-9-]+$/.test(input) || 'Name must be lowercase with hyphens only',
     },
     {
       type: 'input',
       name: 'description',
-      message: 'Agent description:'
+      message: 'Agent description:',
     },
     {
       type: 'list',
       name: 'model',
       message: 'Model preference:',
       choices: ['sonnet', 'opus', 'haiku', 'gpt-4', 'any'],
-      default: 'sonnet'
+      default: 'sonnet',
     },
     {
       type: 'list',
       name: 'color',
       message: 'Theme color:',
       choices: ['green', 'blue', 'yellow', 'red', 'magenta', 'cyan'],
-      default: 'green'
+      default: 'green',
     },
     {
       type: 'input',
       name: 'tags',
-      message: 'Tags (comma-separated):'
-    }
+      message: 'Tags (comma-separated):',
+    },
   ]);
 
   const agentFileName = `${answers.name}.md`;
   const agentPath = path.join(process.cwd(), '.claude/agents/', agentFileName);
-  
+
   const spinner = ora('Creating agent...').start();
-  
+
   try {
     await fs.ensureDir(path.dirname(agentPath));
-    
-    const tags = answers.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
-    
+
+    const tags = answers.tags
+      .split(',')
+      .map((t: string) => t.trim())
+      .filter(Boolean);
+
     const agentContent = `---
 name: ${answers.name}
 description: ${answers.description}
@@ -513,9 +531,9 @@ Describe the agent's core areas of expertise.
 
 Provide examples of how this agent should respond to common queries.
 `;
-    
+
     await fs.writeFile(agentPath, agentContent);
-    
+
     spinner.succeed(chalk.green(`✓ Agent "${answers.name}" created successfully!`));
     console.log(chalk.dim(`Location: ${agentPath}`));
     console.log(chalk.yellow('\nNext steps:'));
@@ -530,28 +548,28 @@ Provide examples of how this agent should respond to common queries.
 
 async function showInstalledAgents() {
   const config = await getLocalConfig();
-  
+
   if (config.installedAgents.length === 0) {
     console.log(chalk.yellow('No agents installed'));
     return;
   }
-  
+
   console.log(chalk.cyan('\n📦 Installed Agents:\n'));
-  
+
   for (const agent of config.installedAgents) {
     // Try to read the agent file to get more details
     try {
       if (await fs.pathExists(agent.location)) {
         const content = await fs.readFile(agent.location, 'utf-8');
         const { data } = matter(content);
-        
+
         const colorMap: Record<string, any> = {
           green: chalk.green,
           blue: chalk.blue,
           yellow: chalk.yellow,
           red: chalk.red,
           magenta: chalk.magenta,
-          cyan: chalk.cyan
+          cyan: chalk.cyan,
         };
         const color = data.color && colorMap[data.color] ? colorMap[data.color] : chalk.green;
         console.log(`${color('•')} ${chalk.bold(agent.name)}`);
@@ -559,7 +577,9 @@ async function showInstalledAgents() {
           console.log(`  ${chalk.gray(data.description)}`);
         }
         console.log(`  ${chalk.dim('Location:')} ${agent.location}`);
-        console.log(`  ${chalk.dim('Installed:')} ${new Date(agent.installedAt).toLocaleDateString()}`);
+        console.log(
+          `  ${chalk.dim('Installed:')} ${new Date(agent.installedAt).toLocaleDateString()}`
+        );
       } else {
         console.log(`${chalk.red('•')} ${chalk.bold(agent.name)} ${chalk.dim('(file missing)')}`);
         console.log(`  ${chalk.dim('Location:')} ${agent.location}`);
@@ -567,7 +587,9 @@ async function showInstalledAgents() {
     } catch (error) {
       console.log(`${chalk.green('•')} ${chalk.bold(agent.name)}`);
       console.log(`  ${chalk.dim('Location:')} ${agent.location}`);
-      console.log(`  ${chalk.dim('Installed:')} ${new Date(agent.installedAt).toLocaleDateString()}`);
+      console.log(
+        `  ${chalk.dim('Installed:')} ${new Date(agent.installedAt).toLocaleDateString()}`
+      );
     }
   }
 }
@@ -578,11 +600,7 @@ program
   .version('0.1.0')
   .option('-l, --list', 'List all available agents');
 
-program
-  .command('list')
-  .alias('ls')
-  .description('List all available agents')
-  .action(listAgents);
+program.command('list').alias('ls').description('List all available agents').action(listAgents);
 
 program
   .command('install [agent]')
@@ -590,11 +608,7 @@ program
   .description('Install an agent to .claude/agents/')
   .action(installAgent);
 
-program
-  .command('create')
-  .alias('new')
-  .description('Create a new agent')
-  .action(createAgent);
+program.command('create').alias('new').description('Create a new agent').action(createAgent);
 
 program
   .command('installed')
@@ -614,9 +628,9 @@ program.action(async (options) => {
     await listAgents();
     return;
   }
-  
+
   console.log(chalk.cyan.bold('\n🤖 AICraft - AI Agent Manager\n'));
-  
+
   const { action } = await inquirer.prompt([
     {
       type: 'list',
@@ -628,11 +642,11 @@ program.action(async (options) => {
         { name: '⬇️  Install an agent', value: 'install' },
         { name: '✨ Create new agent', value: 'create' },
         { name: '📋 Show installed agents', value: 'installed' },
-        { name: '❌ Exit', value: 'exit' }
-      ]
-    }
+        { name: '❌ Exit', value: 'exit' },
+      ],
+    },
   ]);
-  
+
   switch (action) {
     case 'init':
       await initProject();

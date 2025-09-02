@@ -3,8 +3,8 @@ name: docker-expert
 description: Use this agent when you need to containerize applications, optimize Docker configurations, design multi-service architectures, or implement container orchestration strategies. This includes creating efficient Dockerfiles, setting up Docker Compose environments, implementing CI/CD with containers, optimizing image sizes and build times, configuring production deployments with Kubernetes, and establishing container security best practices. The agent specializes in modern containerization patterns, orchestration strategies, and production-ready container architectures.
 model: sonnet
 color: blue
-tags: ["docker", "containers", "kubernetes", "devops", "orchestration", "deployment"]
-mcps: ["web_search", "web_fetch", "filesystem"]
+tags: ['docker', 'containers', 'kubernetes', 'devops', 'orchestration', 'deployment']
+mcps: ['web_search', 'web_fetch', 'filesystem']
 ---
 
 You are an elite DevOps engineer and containerization specialist with deep expertise in Docker, Kubernetes, container orchestration, and production deployment strategies. You combine advanced knowledge of containerization patterns, infrastructure as code, and cloud-native architectures to create scalable, secure, and maintainable container-based systems.
@@ -154,9 +154,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - '5432:5432'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -171,10 +171,10 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-password}", "RETURN 1"]
+      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', '${NEO4J_PASSWORD:-password}', 'RETURN 1']
       interval: 10s
       timeout: 10s
       retries: 5
@@ -195,14 +195,14 @@ services:
       - ./api:/app
       - /app/node_modules
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       postgres:
         condition: service_healthy
       neo4j:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -219,7 +219,7 @@ services:
       - /app/node_modules
       - /app/.next
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       - api
 
@@ -229,9 +229,9 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -272,45 +272,45 @@ spec:
         runAsUser: 1001
         fsGroup: 1001
       containers:
-      - name: api
-        image: myregistry/api:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: url
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        volumeMounts:
-        - name: config-volume
-          mountPath: /app/config
-          readOnly: true
+        - name: api
+          image: myregistry/api:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: url
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
       volumes:
-      - name: config-volume
-        configMap:
-          name: api-config
+        - name: config-volume
+          configMap:
+            name: api-config
 
 ---
 apiVersion: v1
@@ -333,23 +333,23 @@ metadata:
   name: api-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
 spec:
   tls:
-  - hosts:
-    - api.example.com
-    secretName: api-tls
+    - hosts:
+        - api.example.com
+      secretName: api-tls
   rules:
-  - host: api.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: api-service
-            port:
-              number: 80
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 80
 ```
 
 ## Specialized Containerization Areas

@@ -270,7 +270,8 @@ function getAgentDescription(agentName: string): string {
       'Neo4j graph databases, Cypher queries, data modeling, and performance optimization',
     'api-designer': 'designing, architecting, and optimizing REST and GraphQL APIs',
     'docker-expert': 'containerizing applications and designing container orchestration strategies',
-    'react-architect': 'designing and optimizing React applications with modern patterns and Next.js',
+    'react-architect':
+      'designing and optimizing React applications with modern patterns and Next.js',
   };
   return descriptions[agentName] || 'specialized tasks';
 }

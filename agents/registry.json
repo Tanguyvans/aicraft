@@ -30,7 +30,7 @@
     },
     {
       "name": "docker-expert",
-      "filename": "docker-expert.md", 
+      "filename": "docker-expert.md",
       "description": "Containerize applications and design container orchestration strategies",
       "model": "sonnet",
       "color": "blue",
@@ -41,7 +41,7 @@
       "name": "react-architect",
       "filename": "react-architect.md",
       "description": "Design and optimize React applications with modern patterns and Next.js",
-      "model": "sonnet", 
+      "model": "sonnet",
       "color": "cyan",
       "tags": ["react", "nextjs", "vite", "typescript", "architecture", "hooks", "performance"],
       "mcps": []

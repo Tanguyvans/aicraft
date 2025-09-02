@@ -202,6 +202,75 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   await fs.writeJson(settingsPath, settings, { spaces: 2 });
 }
 
+async function manageClaudeFile(installedAgents: string[]): Promise<void> {
+  const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
+  const templatePath = path.join(__dirname, '..', 'agents', 'CLAUDE.md.template');
+  
+  try {
+    // Read the template
+    const template = await fs.readFile(templatePath, 'utf-8');
+    
+    // Get project info
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    let projectName = path.basename(process.cwd());
+    let projectDescription = 'Your project description here.';
+    
+    if (await fs.pathExists(packageJsonPath)) {
+      try {
+        const packageJson = await fs.readJson(packageJsonPath);
+        projectName = packageJson.name || projectName;
+        projectDescription = packageJson.description || projectDescription;
+      } catch (error) {
+        // Use defaults if package.json can't be read
+      }
+    }
+    
+    // Generate sub agents section
+    const registry = await getMcpRegistry();
+    const subAgentsContent = installedAgents.map(agentName => {
+      const agent = agentName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const mcps = getAgentMcps(agentName);
+      return `### ${agentName}
+- **Usage**: Specialized in ${getAgentDescription(agentName)}
+- **MCPs**: ${mcps.join(', ') || 'None'}
+- **Context**: Always pass session context file \`.claude/tasks/context_session_x.md\`
+- **Follow-up**: Read agent documentation in \`.claude/doc/\` before implementation`;
+    }).join('\n\n');
+    
+    // Generate installed agents section
+    const installedAgentsContent = installedAgents.map(agent => `- **${agent}**: Installed`).join('\n');
+    
+    // Replace template variables
+    let content = template
+      .replace('{{PROJECT_NAME}}', projectName)
+      .replace('{{PROJECT_DESCRIPTION}}', projectDescription)
+      .replace('{{SUB_AGENTS}}', subAgentsContent || 'No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.')
+      .replace('{{INSTALLED_AGENTS}}', installedAgentsContent || 'No agents installed yet.');
+    
+    // Write or update CLAUDE.md
+    await fs.writeFile(claudeFilePath, content);
+    
+  } catch (error) {
+    console.error(chalk.yellow('Warning: Could not manage CLAUDE.md file'), error);
+  }
+}
+
+function getAgentDescription(agentName: string): string {
+  const descriptions: Record<string, string> = {
+    'shadcn-ui-expert': 'building and modifying user interfaces using shadcn/ui components and blocks',
+    'neo4j-expert': 'Neo4j graph databases, Cypher queries, data modeling, and performance optimization'
+  };
+  return descriptions[agentName] || 'specialized tasks';
+}
+
+function getAgentMcps(agentName: string): string[] {
+  const mcpMap: Record<string, string[]> = {
+    'shadcn-ui-expert': ['shadcn-components', 'shadcn-themes'],
+    'neo4j-expert': ['neo4j-database']
+  };
+  return mcpMap[agentName] || [];
+}
+
 async function listAgents() {
   const spinner = ora('Loading available agents...').start();
   const agents = await getRegistry();
@@ -334,8 +403,36 @@ async function installAgent(agentName?: string) {
     if (selectedAgent.mcps && selectedAgent.mcps.length > 0) {
       console.log(chalk.dim(`MCPs: ${selectedAgent.mcps.join(', ')}`));
     }
+    
+    // Update CLAUDE.md with new agent
+    const currentlyInstalled = updatedConfig.installedAgents.map(a => a.name);
+    await manageClaudeFile(currentlyInstalled);
+    console.log(chalk.green('✓ Updated CLAUDE.md with agent configuration'));
   } catch (error) {
     downloadSpinner.fail(chalk.red(`Failed to install agent "${selectedAgent.name}"`));
+    console.error(error);
+  }
+}
+
+async function initProject() {
+  console.log(chalk.cyan('🚀 Initialize AICraft Project\n'));
+  
+  const spinner = ora('Creating CLAUDE.md...').start();
+  
+  try {
+    const config = await getLocalConfig();
+    const installedAgents = config.installedAgents.map(a => a.name);
+    
+    await manageClaudeFile(installedAgents);
+    
+    spinner.succeed(chalk.green('✓ CLAUDE.md created successfully!'));
+    console.log(chalk.dim('Location: ./CLAUDE.md'));
+    console.log(chalk.yellow('\nNext steps:'));
+    console.log('1. Review the CLAUDE.md file and customize as needed');
+    console.log('2. Install agents with: npx aicraft install [agent-name]');
+    console.log('3. Start using Claude Code with your configured agents');
+  } catch (error) {
+    spinner.fail(chalk.red('Failed to initialize project'));
     console.error(error);
   }
 }
@@ -505,6 +602,11 @@ program
   .description('Show installed agents')
   .action(showInstalledAgents);
 
+program
+  .command('init')
+  .description('Initialize CLAUDE.md for Claude Code workflow')
+  .action(initProject);
+
 // Default action - show interactive menu or handle global options
 program.action(async (options) => {
   // Handle global --list option
@@ -521,6 +623,7 @@ program.action(async (options) => {
       name: 'action',
       message: 'What would you like to do?',
       choices: [
+        { name: '🚀 Initialize project', value: 'init' },
         { name: '📦 Browse available agents', value: 'list' },
         { name: '⬇️  Install an agent', value: 'install' },
         { name: '✨ Create new agent', value: 'create' },
@@ -531,6 +634,9 @@ program.action(async (options) => {
   ]);
   
   switch (action) {
+    case 'init':
+      await initProject();
+      break;
     case 'list':
       await listAgents();
       break;

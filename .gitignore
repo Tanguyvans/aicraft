@@ -12,6 +12,7 @@ coverage
 # Local development files
 .aicraft/
 .claude/
+.mcp.json
 
 # Test files
 test-agents/

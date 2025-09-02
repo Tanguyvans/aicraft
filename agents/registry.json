@@ -9,6 +9,15 @@
       "color": "green",
       "tags": ["ui", "shadcn", "react", "typescript", "tailwind"],
       "mcps": ["shadcn-components", "shadcn-themes"]
+    },
+    {
+      "name": "neo4j-expert",
+      "filename": "neo4j-expert.md",
+      "description": "Neo4j graph database specialist for Cypher queries, data modeling, and performance optimization",
+      "model": "sonnet",
+      "color": "blue",
+      "tags": ["database", "graph", "cypher", "neo4j", "performance"],
+      "mcps": ["neo4j-database"]
     }
   ]
 }

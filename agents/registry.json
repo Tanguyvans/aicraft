@@ -45,6 +45,15 @@
       "color": "cyan",
       "tags": ["react", "nextjs", "vite", "typescript", "architecture", "hooks", "performance"],
       "mcps": []
+    },
+    {
+      "name": "vastai-expert",
+      "filename": "vastai-expert.md",
+      "description": "Deploy GPU-accelerated workloads on Vast.AI cloud infrastructure",
+      "model": "sonnet",
+      "color": "purple",
+      "tags": ["vastai", "gpu", "ml", "cloud", "deployment", "containers"],
+      "mcps": []
     }
   ]
 }

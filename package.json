@@ -30,7 +30,8 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "agents"
+    "agents",
+    "docs"
   ],
   "scripts": {
     "build": "tsc",

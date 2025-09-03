@@ -272,7 +272,6 @@ function getAgentDescription(agentName: string): string {
     'docker-expert': 'containerizing applications and designing container orchestration strategies',
     'react-architect':
       'designing and optimizing React applications with modern patterns and Next.js',
-    'vastai-expert': 'deploying GPU-accelerated workloads on Vast.AI cloud infrastructure',
   };
   return descriptions[agentName] || 'specialized tasks';
 }
@@ -284,7 +283,6 @@ function getAgentMcps(agentName: string): string[] {
     'api-designer': [],
     'docker-expert': [],
     'react-architect': [],
-    'vastai-expert': [],
   };
   return mcpMap[agentName] || [];
 }

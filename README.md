@@ -8,6 +8,7 @@ AI Agent Package Manager for Claude - Install and manage AI agents for your Clau
 - 🎯 **Claude Integration**: Agents install directly to `.claude/agents/`
 - ✨ **Interactive CLI**: Easy-to-use commands for managing agents
 - 🔧 **Agent Creation**: Create and share your own agents
+- 📚 **Documentation**: Built-in docs for deployment patterns and guides
 - 🏷️ **Frontmatter Format**: Simple markdown format with metadata
 
 ## Quick Start
@@ -27,15 +28,22 @@ npx aicraft
 ## Available Agents
 
 - **shadcn-ui-expert**: Build and modify user interfaces using shadcn/ui components and blocks
+- **neo4j-expert**: Neo4j graph database specialist for Cypher queries and data modeling
+- **api-designer**: Design, architect, and optimize REST and GraphQL APIs
+- **docker-expert**: Containerize applications and design container orchestration
+- **react-architect**: Design and optimize React applications with modern patterns
 
 ## Commands
 
 ```bash
 npx aicraft                    # Interactive menu
+npx aicraft init               # Initialize project with CLAUDE.md and docs
 npx aicraft list               # List all available agents
 npx aicraft install <agent>    # Install a specific agent
 npx aicraft create             # Create a new agent
 npx aicraft installed          # Show installed agents
+npx aicraft docs               # List available documentation
+npx aicraft docs <doc-name>    # Show specific documentation
 ```
 
 ## Agent Format

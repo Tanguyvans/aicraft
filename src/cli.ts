@@ -446,8 +446,9 @@ async function initProject() {
     const installedAgents = config.installedAgents.map((a) => a.name);
 
     await manageClaudeFile(installedAgents);
+    await copyDocsToProject();
 
-    spinner.succeed(chalk.green('✓ CLAUDE.md created successfully!'));
+    spinner.succeed(chalk.green('✓ CLAUDE.md and documentation created successfully!'));
     console.log(chalk.dim('Location: ./CLAUDE.md'));
     console.log(chalk.yellow('\nNext steps:'));
     console.log('1. Review the CLAUDE.md file and customize as needed');
@@ -553,6 +554,64 @@ Provide examples of how this agent should respond to common queries.
   }
 }
 
+async function showDocs(docName?: string) {
+  const docsPath = path.join(__dirname, '..', 'docs');
+
+  if (!docName) {
+    // List available docs
+    try {
+      const docFiles = await fs.readdir(docsPath);
+      const markdownFiles = docFiles.filter((f) => f.endsWith('.md'));
+
+      if (markdownFiles.length === 0) {
+        console.log(chalk.yellow('No documentation files found'));
+        return;
+      }
+
+      console.log(chalk.cyan('\n📚 Available Documentation:\n'));
+      for (const file of markdownFiles) {
+        const docKey = path.basename(file, '.md');
+        console.log(`  • ${docKey}`);
+      }
+      console.log(chalk.dim('\nUsage: npx aicraft docs [doc-name]'));
+    } catch (error) {
+      console.log(chalk.red('Could not access documentation directory'));
+    }
+    return;
+  }
+
+  // Show specific doc
+  const docFile = `${docName}.md`;
+  const docFilePath = path.join(docsPath, docFile);
+
+  try {
+    if (!(await fs.pathExists(docFilePath))) {
+      console.log(chalk.red(`Documentation "${docName}" not found`));
+      console.log(chalk.dim('Run "npx aicraft docs" to see available docs'));
+      return;
+    }
+
+    const content = await fs.readFile(docFilePath, 'utf-8');
+    console.log(content);
+  } catch (error) {
+    console.log(chalk.red(`Could not read documentation: ${docName}`));
+  }
+}
+
+async function copyDocsToProject() {
+  const docsSourcePath = path.join(__dirname, '..', 'docs');
+  const docsTargetPath = path.join(process.cwd(), 'docs');
+
+  try {
+    if (await fs.pathExists(docsSourcePath)) {
+      await fs.copy(docsSourcePath, docsTargetPath);
+      console.log(chalk.green('✓ Documentation copied to ./docs/'));
+    }
+  } catch (error) {
+    console.log(chalk.yellow('Warning: Could not copy documentation files'));
+  }
+}
+
 async function showInstalledAgents() {
   const config = await getLocalConfig();
 
@@ -628,6 +687,11 @@ program
   .description('Initialize CLAUDE.md for Claude Code workflow')
   .action(initProject);
 
+program
+  .command('docs [doc-name]')
+  .description('Show documentation (list all or display specific doc)')
+  .action(showDocs);
+
 // Default action - show interactive menu or handle global options
 program.action(async (options) => {
   // Handle global --list option
@@ -649,6 +713,7 @@ program.action(async (options) => {
         { name: '⬇️  Install an agent', value: 'install' },
         { name: '✨ Create new agent', value: 'create' },
         { name: '📋 Show installed agents', value: 'installed' },
+        { name: '📚 Show documentation', value: 'docs' },
         { name: '❌ Exit', value: 'exit' },
       ],
     },
@@ -669,6 +734,9 @@ program.action(async (options) => {
       break;
     case 'installed':
       await showInstalledAgents();
+      break;
+    case 'docs':
+      await showDocs();
       break;
     case 'exit':
       console.log(chalk.gray('Goodbye!'));

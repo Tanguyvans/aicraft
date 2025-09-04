@@ -13,22 +13,20 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className={styles.heroContent}>
-        <div className={styles.brandingText}>
-          CLAUDE CODE AGENTS
-        </div>
+        <div className={styles.brandingText}>CLAUDE CODE AGENTS</div>
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
-          <Link 
-            className={clsx("button button--primary button--lg", styles.primaryButton)} 
+          <Link
+            className={clsx('button button--primary button--lg', styles.primaryButton)}
             to="/docs/intro"
           >
             Get Started
           </Link>
           <Link
-            className={clsx("button button--secondary button--lg", styles.secondaryButton)}
+            className={clsx('button button--secondary button--lg', styles.secondaryButton)}
             href="https://www.npmjs.com/package/aicraft"
           >
             Install
@@ -43,7 +41,7 @@ function TerminalCommands() {
   const commands = [
     { command: 'npm install -g aicraft', description: 'Install AICraft globally' },
     { command: 'npx aicraft list', description: 'View available agents' },
-    { command: 'npx aicraft install neo4j-expert', description: 'Install specialized agent' }
+    { command: 'npx aicraft install neo4j-expert', description: 'Install specialized agent' },
   ];
 
   return (
@@ -52,9 +50,9 @@ function TerminalCommands() {
         <div className={styles.terminalWrapper}>
           <div className={styles.terminalHeader}>
             <div className={styles.terminalButtons}>
-              <span className={styles.terminalButton} style={{backgroundColor: '#ff5f57'}}></span>
-              <span className={styles.terminalButton} style={{backgroundColor: '#ffbd2e'}}></span>
-              <span className={styles.terminalButton} style={{backgroundColor: '#28ca42'}}></span>
+              <span className={styles.terminalButton} style={{ backgroundColor: '#ff5f57' }}></span>
+              <span className={styles.terminalButton} style={{ backgroundColor: '#ffbd2e' }}></span>
+              <span className={styles.terminalButton} style={{ backgroundColor: '#28ca42' }}></span>
             </div>
             <div className={styles.terminalTitle}>AICraft Commands</div>
           </div>

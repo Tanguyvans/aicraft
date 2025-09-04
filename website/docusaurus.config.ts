@@ -15,10 +15,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://tanguyvans.github.io',
+  url: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://tanguyvans.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/aicraft/',
+  baseUrl: process.env.NODE_ENV === 'development' ? '/' : '/aicraft/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -89,15 +89,15 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/intro',
+              to: 'docs/intro',
             },
             {
               label: 'Available Agents',
-              to: '/docs/agents',
+              to: 'docs/agents',
             },
             {
               label: 'CLI Commands',
-              to: '/docs/commands',
+              to: 'docs/commands',
             },
           ],
         },

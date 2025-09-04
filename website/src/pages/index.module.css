@@ -1,23 +1,275 @@
 /**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
+ * Modern landing page styles for AICraft
  */
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 6rem 0 8rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: var(--ifm-hero-background-gradient);
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroBanner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(124, 58, 237, 0.2) 0%, transparent 50%);
+  opacity: 0.8;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  min-width: 180px;
+  height: 52px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.button:hover::before {
+  opacity: 1;
+}
+
+.button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+}
+
+.quickStart {
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-block;
+}
+
+.brandingText {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Terminal Section Styles */
+.terminalSection {
+  padding: 6rem 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  position: relative;
+}
+
+[data-theme='dark'] .terminalSection {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+.terminalWrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #1e293b;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.terminalHeader {
+  background: #334155;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.terminalButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.terminalButton {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+
+.terminalTitle {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+}
+
+.terminalContent {
+  padding: 2rem;
+  background: #1e293b;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.terminalLine {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.terminalLine:last-child {
+  margin-bottom: 0;
+}
+
+.terminalPrompt {
+  color: #10b981;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.terminalCommand {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.terminalComment {
+  color: #64748b;
+  margin-top: 0.25rem;
+  font-style: italic;
+  padding-left: 1.5rem;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 4rem 0 6rem;
+    min-height: 60vh;
+  }
+  
+  .heroContent {
+    padding: 0 1rem;
+  }
+  
+  .brandingText {
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+  }
+  
+  .buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .button {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .terminalSection {
+    padding: 4rem 0;
+  }
+  
+  .terminalWrapper {
+    margin: 0 1rem;
+  }
+  
+  .terminalContent {
+    padding: 1.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .terminalHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .terminalTitle {
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .heroBanner {
+    padding: 3rem 0 4rem;
+    min-height: 50vh;
+  }
+  
+  .brandingText {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+  
+  .terminalContent {
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  
+  .terminalComment {
+    padding-left: 1rem;
+  }
 }

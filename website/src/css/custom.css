@@ -1,30 +1,215 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Modern theme for AICraft - AI Agent Package Manager
  */
 
-/* You can override the default Infima variables here. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* Modern color palette */
+  --ifm-color-primary: #6366f1;
+  --ifm-color-primary-dark: #5856eb;
+  --ifm-color-primary-darker: #5145e6;
+  --ifm-color-primary-darkest: #3730a3;
+  --ifm-color-primary-light: #7c3aed;
+  --ifm-color-primary-lighter: #8b5cf6;
+  --ifm-color-primary-lightest: #a78bfa;
+  
+  /* Enhanced typography */
+  --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --ifm-font-size-base: 16px;
+  --ifm-line-height-base: 1.6;
+  --ifm-font-weight-base: 400;
+  --ifm-font-weight-bold: 600;
+  
+  /* Modern spacing and layout */
+  --ifm-spacing-horizontal: 1.5rem;
+  --ifm-navbar-height: 4rem;
+  --ifm-code-font-size: 0.875rem;
+  
+  /* Enhanced colors */
+  --ifm-color-secondary: #f1f5f9;
+  --ifm-color-success: #10b981;
+  --ifm-color-info: #06b6d4;
+  --ifm-color-warning: #f59e0b;
+  --ifm-color-danger: #ef4444;
+  
+  /* Background gradients */
+  --ifm-hero-background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --ifm-card-background-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  
+  /* Code styling */
+  --docusaurus-highlighted-code-line-bg: rgba(99, 102, 241, 0.1);
+  --ifm-code-background: #f8fafc;
+  
+  /* Border radius for modern look */
+  --ifm-button-border-radius: 0.75rem;
+  --ifm-card-border-radius: 1rem;
+  --ifm-code-border-radius: 0.5rem;
+  
+  /* Shadows for depth */
+  --ifm-box-shadow-tl: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ifm-box-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Dark mode modern colors */
+  --ifm-color-primary: #a78bfa;
+  --ifm-color-primary-dark: #9333ea;
+  --ifm-color-primary-darker: #8b5cf6;
+  --ifm-color-primary-darkest: #7c3aed;
+  --ifm-color-primary-light: #c4b5fd;
+  --ifm-color-primary-lighter: #ddd6fe;
+  --ifm-color-primary-lightest: #ede9fe;
+  
+  /* Dark background */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  
+  /* Dark gradients */
+  --ifm-hero-background-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  --ifm-card-background-gradient: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  
+  /* Dark code styling */
+  --docusaurus-highlighted-code-line-bg: rgba(167, 139, 250, 0.2);
+  --ifm-code-background: #1e293b;
+}
+
+/* Modern hero section styling */
+.hero {
+  background: var(--ifm-hero-background-gradient);
+  padding: 4rem 0 6rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.3;
+}
+
+.hero__title {
+  font-size: 3.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero__subtitle {
+  font-size: 1.375rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin-bottom: 1.5rem;
+}
+
+.hero__description {
+  font-size: 1.125rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin-bottom: 0 !important;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Modern button styling */
+.button {
+  font-weight: 600;
+  border-radius: var(--ifm-button-border-radius);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--ifm-box-shadow-tl);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-box-shadow-md);
+}
+
+.button--primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+}
+
+.button--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.button--secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Modern card styling */
+.card {
+  background: var(--ifm-card-background-gradient);
+  border-radius: var(--ifm-card-border-radius);
+  border: none;
+  box-shadow: var(--ifm-box-shadow-tl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ifm-box-shadow-md);
+}
+
+/* Enhanced navbar */
+.navbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--ifm-box-shadow-tl);
+}
+
+[data-theme='dark'] .navbar {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Code blocks enhancement */
+.prism-code {
+  border-radius: var(--ifm-code-border-radius);
+  box-shadow: var(--ifm-box-shadow-tl);
+}
+
+/* Smooth animations */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Feature section enhancements */
+.features-section {
+  padding: 6rem 0;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+[data-theme='dark'] .features-section {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Responsive design improvements */
+@media screen and (max-width: 768px) {
+  .hero__title {
+    font-size: 2.5rem !important;
+  }
+  
+  .hero__subtitle {
+    font-size: 1.125rem !important;
+  }
+  
+  .hero {
+    padding: 3rem 0 4rem;
+  }
 }

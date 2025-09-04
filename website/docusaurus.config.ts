@@ -59,27 +59,37 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
+    colorMode: {
+      defaultMode: 'light',
+      disableSwitch: false,
+      respectPrefersColorScheme: true,
+    },
     navbar: {
       title: 'AICraft',
       logo: {
         alt: 'AICraft Logo',
         src: 'img/logo.svg',
       },
+      hideOnScroll: true,
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Docs',
+          label: 'Documentation',
         },
         {
           href: 'https://www.npmjs.com/package/aicraft',
-          label: 'npm',
+          label: 'NPM Package',
           position: 'right',
         },
         {
           href: 'https://github.com/Tanguyvans/aicraft',
           label: 'GitHub',
+          position: 'right',
+        },
+        {
+          type: 'search',
           position: 'right',
         },
       ],

@@ -7,12 +7,14 @@ AICraft provides 4 specialized agents for complex architectural decisions.
 **Expertise**: Graph database modeling, Cypher queries, performance optimization
 
 **Use Cases**:
+
 - Social network platforms
-- Recommendation systems  
+- Recommendation systems
 - Knowledge graphs
 - Fraud detection networks
 
 **Installation**:
+
 ```bash
 npx aicraft install neo4j-expert
 ```
@@ -22,12 +24,14 @@ npx aicraft install neo4j-expert
 **Expertise**: REST and GraphQL API architecture, scalable backend patterns
 
 **Use Cases**:
+
 - Microservices architecture
 - API gateway design
 - Authentication strategies
 - Database integration patterns
 
 **Installation**:
+
 ```bash
 npx aicraft install api-designer
 ```
@@ -37,12 +41,14 @@ npx aicraft install api-designer
 **Expertise**: React optimization, modern patterns, Next.js 15 App Router
 
 **Use Cases**:
+
 - Performance optimization
 - Component architecture
 - State management strategies
 - Build configuration
 
 **Installation**:
+
 ```bash
 npx aicraft install react-architect
 ```
@@ -52,12 +58,14 @@ npx aicraft install react-architect
 **Expertise**: Container orchestration, deployment strategies, production setups
 
 **Use Cases**:
+
 - Microservices deployment
 - CI/CD pipelines
 - Production orchestration
 - Development environments
 
 **Installation**:
+
 ```bash
 npx aicraft install docker-expert
 ```

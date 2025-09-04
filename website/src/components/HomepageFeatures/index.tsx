@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
@@ -15,8 +15,8 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        4 focused AI agents for complex expertise: Neo4j graphs, React optimization, 
-        API design, and Docker orchestration. Each agent provides architectural decisions.
+        4 focused AI agents for complex expertise: Neo4j graphs, React optimization, API design, and
+        Docker orchestration. Each agent provides architectural decisions.
       </>
     ),
   },
@@ -25,7 +25,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Access deployment guides and reference materials with <code>npx aicraft docs</code>. 
+        Access deployment guides and reference materials with <code>npx aicraft docs</code>.
         Copy-paste commands for GPU deployment, CI/CD, and more.
       </>
     ),
@@ -35,14 +35,14 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Agents install directly to <code>.claude/agents/</code> with automatic MCP configuration. 
+        Agents install directly to <code>.claude/agents/</code> with automatic MCP configuration.
         Seamless integration with your Claude Code workflow.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({ title, Svg, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">

@@ -23,7 +23,7 @@ npx aicraft docs vastai-deployment
 ### Specialized Experts
 
 - **neo4j-expert** - Graph database modeling and Cypher optimization
-- **api-designer** - REST/GraphQL API architecture and patterns  
+- **api-designer** - REST/GraphQL API architecture and patterns
 - **react-architect** - React optimization and modern patterns
 - **docker-expert** - Container orchestration and deployment strategies
 

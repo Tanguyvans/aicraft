@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "shadcn-components": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@jpisnice/shadcn-ui-mcp-server",
+        "--github-api-key",
+        "${GITHUB_API_KEY}"
+      ],
+      "env": {}
+    },
+    "shadcn-themes": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "shadcn@canary",
+        "registry:mcp"
+      ],
+      "env": {
+        "REGISTRY_URL": "https://tweakcn.com/r/themes/registry.json"
+      }
+    },
+    "neo4j-database": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-neo4j-cypher@0.3.1",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "NEO4J_URI": "${NEO4J_URI}",
+        "NEO4J_USERNAME": "${NEO4J_USERNAME}",
+        "NEO4J_PASSWORD": "${NEO4J_PASSWORD}",
+        "NEO4J_DATABASE": "${NEO4J_DATABASE}"
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "version": "1.0.0",
+  "mcpServers": {
+    "shadcn-themes": {
+      "name": "shadcn-themes",
+      "description": "Access shadcn/ui themes from the registry",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shadcn@canary", "registry:mcp"],
+      "env": {
+        "REGISTRY_URL": "https://tweakcn.com/r/themes/registry.json"
+      },
+      "category": "UI/Design",
+      "tags": ["shadcn", "themes", "ui", "design"]
+    },
+    "shadcn-components": {
+      "name": "shadcn-components",
+      "description": "Access shadcn/ui components and documentation",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@jpisnice/shadcn-ui-mcp-server", "--github-api-key", "${GITHUB_API_KEY}"],
+      "env": {},
+      "category": "UI/Design",
+      "tags": ["shadcn", "components", "ui", "react"]
+    },
+    "elevenlabs": {
+      "name": "elevenlabs",
+      "description": "Text-to-speech, speech-to-text, and AI voice tools",
+      "type": "stdio",
+      "command": "/Users/tanguyvans/.local/bin/uvx",
+      "args": ["elevenlabs-mcp"],
+      "env": {
+        "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
+      },
+      "category": "AI/Audio",
+      "tags": ["tts", "stt", "voice", "audio", "ai"]
+    },
+    "filesystem": {
+      "name": "filesystem",
+      "description": "Access to local filesystem operations",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {},
+      "category": "System",
+      "tags": ["filesystem", "files", "system"]
+    },
+    "github": {
+      "name": "github",
+      "description": "Access GitHub repositories and APIs",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "category": "Development",
+      "tags": ["github", "git", "repositories", "development"]
+    },
+    "neo4j-database": {
+      "name": "neo4j-database",
+      "description": "Neo4j graph database operations with Cypher queries",
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-neo4j-cypher@0.3.1", "--transport", "stdio"],
+      "env": {
+        "NEO4J_URI": "${NEO4J_URI}",
+        "NEO4J_USERNAME": "${NEO4J_USERNAME}",
+        "NEO4J_PASSWORD": "${NEO4J_PASSWORD}",
+        "NEO4J_DATABASE": "${NEO4J_DATABASE}"
+      },
+      "category": "Database",
+      "tags": ["neo4j", "graph", "database", "cypher"]
+    }
+  }
+}

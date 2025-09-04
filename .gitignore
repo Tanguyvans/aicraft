@@ -1,0 +1,22 @@
+node_modules
+dist
+.DS_Store
+*.log
+.env
+coverage
+.vscode
+.idea
+*.swp
+*.swo
+
+# Local development files
+.aicraft/
+.claude/
+.mcp.json
+
+# Test files
+test-agents/
+
+# Temporary files
+*.tmp
+*.temp

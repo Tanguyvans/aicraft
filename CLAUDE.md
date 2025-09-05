@@ -1,6 +1,6 @@
-# {{PROJECT_NAME}}
+# aicraft
 
-{{PROJECT_DESCRIPTION}}
+AI Agent Package Manager for Claude - Install and manage AI agents
 
 ## Rules
 
@@ -12,13 +12,14 @@
 
 You have access to specialized sub agents:
 
-{{SUB_AGENTS}}
+No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.
 
 ## Quick References
 
 For specific deployment tasks, check these documentation files:
 
-{{INSTALLED_DOCS}}
+- **vastai-deployment**: Available in `docs/vastai-deployment.md`
+- **docusaurus-setup**: Available in `docs/docusaurus-setup.md`
 
 ## Context Session Management
 
@@ -75,4 +76,4 @@ npx aicraft init
 
 ## Installed Agents
 
-{{INSTALLED_AGENTS}}
+No agents installed yet.

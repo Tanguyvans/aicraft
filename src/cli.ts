@@ -55,6 +55,11 @@ interface LocalConfig {
     installedAt: string;
     location: string;
   }>;
+  installedDocs: Array<{
+    name: string;
+    installedAt: string;
+    location: string;
+  }>;
 }
 
 const program = new Command();
@@ -149,6 +154,7 @@ async function getLocalConfig(): Promise<LocalConfig> {
   const defaultConfig: LocalConfig = {
     installPath: '.claude/agents/',
     installedAgents: [],
+    installedDocs: [],
   };
 
   try {
@@ -252,7 +258,7 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   await fs.writeJson(settingsPath, settings, { spaces: 2 });
 }
 
-async function manageClaudeFile(installedAgents: string[]): Promise<void> {
+async function manageClaudeFile(installedAgents: string[], installedDocs: string[] = []): Promise<void> {
   const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
   const templatePath = path.join(__dirname, '..', 'agents', 'CLAUDE.md.template');
 
@@ -294,6 +300,11 @@ async function manageClaudeFile(installedAgents: string[]): Promise<void> {
       .map((agent) => `- **${agent}**: Installed`)
       .join('\n');
 
+    // Generate installed docs section
+    const installedDocsContent = installedDocs
+      .map((doc) => `- **${doc}**: Available in \`docs/${doc}.md\``)
+      .join('\n');
+
     // Replace template variables
     let content = template
       .replace('{{PROJECT_NAME}}', projectName)
@@ -303,7 +314,8 @@ async function manageClaudeFile(installedAgents: string[]): Promise<void> {
         subAgentsContent ||
           'No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.'
       )
-      .replace('{{INSTALLED_AGENTS}}', installedAgentsContent || 'No agents installed yet.');
+      .replace('{{INSTALLED_AGENTS}}', installedAgentsContent || 'No agents installed yet.')
+      .replace('{{INSTALLED_DOCS}}', installedDocsContent || 'No documentation installed yet.');
 
     // Write or update CLAUDE.md
     await fs.writeFile(claudeFilePath, content);
@@ -402,42 +414,70 @@ async function listAgents() {
 }
 
 async function installAgent(agentName?: string) {
-  const spinner = ora('Loading agent registry...').start();
-  const agents = await getRegistry();
+  const spinner = ora('Loading registry...').start();
+  const [agents, docs] = await Promise.all([getRegistry(), getDocsRegistry()]);
   spinner.stop();
 
-  if (agents.length === 0) {
-    console.log(chalk.red('No agents available'));
+  if (agents.length === 0 && docs.length === 0) {
+    console.log(chalk.red('No agents or docs available'));
     return;
   }
 
-  let selectedAgent: Agent;
+  let selectedItem: Agent | Doc;
+  let itemType: 'agent' | 'doc';
 
   if (agentName) {
+    // Check agents first
     const agent = agents.find((a) => a.name === agentName);
-    if (!agent) {
-      console.log(chalk.red(`Agent "${agentName}" not found`));
-      return;
+    if (agent) {
+      selectedItem = agent;
+      itemType = 'agent';
+    } else {
+      // Check docs
+      const doc = docs.find((d) => d.name === agentName);
+      if (doc) {
+        selectedItem = doc;
+        itemType = 'doc';
+      } else {
+        console.log(chalk.red(`Agent or documentation "${agentName}" not found`));
+        return;
+      }
     }
-    selectedAgent = agent;
   } else {
     // Interactive selection
-    const { agent } = await inquirer.prompt([
+    const choices = [
+      ...agents.map((a) => ({
+        name: `🤖 ${a.name} - ${a.description}`,
+        value: { item: a, type: 'agent' as const },
+      })),
+      ...docs.map((d) => ({
+        name: `📚 ${d.name} - ${d.description}`,
+        value: { item: d, type: 'doc' as const },
+      })),
+    ];
+
+    const { selection } = await inquirer.prompt([
       {
         type: 'list',
-        name: 'agent',
-        message: 'Select an agent to install:',
-        choices: agents.map((a) => ({
-          name: `${a.name} - ${a.description}`,
-          value: a,
-        })),
+        name: 'selection',
+        message: 'Select an agent or documentation to install:',
+        choices,
       },
     ]);
-    selectedAgent = agent;
+    selectedItem = selection.item;
+    itemType = selection.type;
   }
 
   const config = await getLocalConfig();
 
+  if (itemType === 'agent') {
+    return await installAgentLogic(selectedItem as Agent, config);
+  } else {
+    return await installDocLogic(selectedItem as Doc, config);
+  }
+}
+
+async function installAgentLogic(selectedAgent: Agent, config: LocalConfig) {
   // Check if already installed
   const existing = config.installedAgents.find((a) => a.name === selectedAgent.name);
   if (existing) {
@@ -502,10 +542,76 @@ async function installAgent(agentName?: string) {
 
     // Update CLAUDE.md with new agent
     const currentlyInstalled = updatedConfig.installedAgents.map((a) => a.name);
-    await manageClaudeFile(currentlyInstalled);
+    const currentlyInstalledDocs = updatedConfig.installedDocs.map((d) => d.name);
+    await manageClaudeFile(currentlyInstalled, currentlyInstalledDocs);
     console.log(chalk.green('✓ Updated CLAUDE.md with agent configuration'));
   } catch (error) {
     downloadSpinner.fail(chalk.red(`Failed to install agent "${selectedAgent.name}"`));
+    console.error(error);
+  }
+}
+
+async function installDocLogic(selectedDoc: Doc, config: LocalConfig) {
+  // Check if already installed
+  const existing = config.installedDocs.find((d) => d.name === selectedDoc.name);
+  if (existing) {
+    const { overwrite } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'overwrite',
+        message: `Documentation "${selectedDoc.name}" is already installed. Overwrite?`,
+        default: false,
+      },
+    ]);
+
+    if (!overwrite) {
+      return;
+    }
+  }
+
+  // Install to docs directory
+  const installPath = 'docs/';
+  const docFileName = `${selectedDoc.name}.md`;
+  const docPath = path.join(process.cwd(), installPath, docFileName);
+
+  const downloadSpinner = ora(`Installing ${selectedDoc.name} documentation...`).start();
+
+  try {
+    // Ensure directory exists
+    await fs.ensureDir(path.dirname(docPath));
+
+    // Copy doc file from package
+    const sourceFile = path.join(__dirname, '..', 'docs', selectedDoc.filename);
+
+    if (await fs.pathExists(sourceFile)) {
+      await fs.copyFile(sourceFile, docPath);
+    } else {
+      throw new Error(`Documentation file not found: ${selectedDoc.filename}`);
+    }
+
+    // Update local config
+    const updatedConfig = await getLocalConfig();
+    updatedConfig.installedDocs = updatedConfig.installedDocs.filter(
+      (d) => d.name !== selectedDoc.name
+    );
+    updatedConfig.installedDocs.push({
+      name: selectedDoc.name,
+      installedAt: new Date().toISOString(),
+      location: docPath,
+    });
+    await saveLocalConfig(updatedConfig);
+
+    downloadSpinner.succeed(chalk.green(`✓ Documentation "${selectedDoc.name}" installed successfully!`));
+    console.log(chalk.dim(`Location: ${docPath}`));
+    console.log(chalk.dim(`Category: ${selectedDoc.category || 'general'}`));
+
+    // Update CLAUDE.md with new doc
+    const currentlyInstalledAgents = updatedConfig.installedAgents.map((a) => a.name);
+    const currentlyInstalledDocs = updatedConfig.installedDocs.map((d) => d.name);
+    await manageClaudeFile(currentlyInstalledAgents, currentlyInstalledDocs);
+    console.log(chalk.green('✓ Updated CLAUDE.md with documentation reference'));
+  } catch (error) {
+    downloadSpinner.fail(chalk.red(`Failed to install documentation "${selectedDoc.name}"`));
     console.error(error);
   }
 }

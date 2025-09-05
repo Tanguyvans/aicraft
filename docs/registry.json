@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "docs": [
+    {
+      "name": "vastai-deployment",
+      "filename": "vastai-deployment.md",
+      "description": "Deploy applications on high-performance GPU instances using Vast.AI",
+      "category": "deployment",
+      "color": "green",
+      "tags": ["gpu", "deployment", "vastai", "ml", "ai", "training"]
+    },
+    {
+      "name": "docusaurus-setup",
+      "filename": "docusaurus-setup.md",
+      "description": "Create and modernize Docusaurus websites with contemporary design",
+      "category": "development",
+      "color": "blue", 
+      "tags": ["docusaurus", "website", "documentation", "react", "typescript", "modern"]
+    }
+  ]
+}

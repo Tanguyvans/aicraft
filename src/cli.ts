@@ -23,6 +23,15 @@ interface Agent {
   mcps?: string[];
 }
 
+interface Doc {
+  name: string;
+  filename: string;
+  description: string;
+  category?: string;
+  color?: string;
+  tags: string[];
+}
+
 interface McpServer {
   name: string;
   description: string;
@@ -89,6 +98,47 @@ async function getRegistry(): Promise<Agent[]> {
     return [];
   } catch (error) {
     console.error(chalk.red('Failed to load agent registry:'), error);
+    return [];
+  }
+}
+
+async function getDocsRegistry(): Promise<Doc[]> {
+  try {
+    // Read from local docs directory in the package
+    const docsDir = path.join(__dirname, '..', 'docs');
+    const registryPath = path.join(docsDir, 'registry.json');
+
+    if (await fs.pathExists(registryPath)) {
+      const registry = await fs.readJson(registryPath);
+      return registry.docs;
+    }
+
+    // Fallback: scan directory for .md files
+    if (await fs.pathExists(docsDir)) {
+      const files = await fs.readdir(docsDir);
+      const docFiles = files.filter((f) => f.endsWith('.md'));
+
+      const docs: Doc[] = [];
+      for (const file of docFiles) {
+        const content = await fs.readFile(path.join(docsDir, file), 'utf-8');
+        const { data } = matter(content);
+
+        const name = file.replace('.md', '');
+        docs.push({
+          name: data.name || name,
+          filename: file,
+          description: data.description || 'Documentation guide',
+          category: data.category,
+          color: data.color || 'cyan',
+          tags: data.tags || [],
+        });
+      }
+      return docs;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(chalk.red('Failed to load docs registry:'), error);
     return [];
   }
 }
@@ -288,43 +338,67 @@ function getAgentMcps(agentName: string): string[] {
 }
 
 async function listAgents() {
-  const spinner = ora('Loading available agents...').start();
-  const agents = await getRegistry();
+  const spinner = ora('Loading available agents and docs...').start();
+  const [agents, docs] = await Promise.all([getRegistry(), getDocsRegistry()]);
   spinner.stop();
 
-  if (agents.length === 0) {
-    console.log(chalk.yellow('No agents available'));
-    return;
+  const colorMap: Record<string, any> = {
+    green: chalk.green,
+    blue: chalk.blue,
+    yellow: chalk.yellow,
+    red: chalk.red,
+    magenta: chalk.magenta,
+    cyan: chalk.cyan,
+    orange: chalk.rgb(255, 165, 0),
+  };
+
+  // Show agents
+  if (agents.length > 0) {
+    console.log(chalk.cyan('\n📦 Available Agents:\n'));
+
+    agents.forEach((agent) => {
+      const color = agent.color && colorMap[agent.color] ? colorMap[agent.color] : chalk.green;
+      console.log(`  ${color('•')} ${chalk.bold(agent.name)}`);
+      console.log(`    ${chalk.gray(agent.description)}`);
+      if (agent.model) {
+        console.log(`    ${chalk.dim('Model:')} ${agent.model}`);
+      }
+      if (agent.mcps && agent.mcps.length > 0) {
+        console.log(
+          `    ${chalk.dim('MCPs:')} ${agent.mcps.map((mcp: string) => chalk.magenta(mcp)).join(', ')}`
+        );
+      }
+      if (agent.tags && agent.tags.length > 0) {
+        console.log(
+          `    ${chalk.dim('Tags:')} ${agent.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
+        );
+      }
+    });
   }
 
-  console.log(chalk.cyan('\n📦 Available Agents:\n'));
+  // Show documentation
+  if (docs.length > 0) {
+    console.log(chalk.cyan('\n📚 Available Documentation:\n'));
 
-  agents.forEach((agent) => {
-    const colorMap: Record<string, any> = {
-      green: chalk.green,
-      blue: chalk.blue,
-      yellow: chalk.yellow,
-      red: chalk.red,
-      magenta: chalk.magenta,
-      cyan: chalk.cyan,
-    };
-    const color = agent.color && colorMap[agent.color] ? colorMap[agent.color] : chalk.green;
-    console.log(`  ${color('•')} ${chalk.bold(agent.name)}`);
-    console.log(`    ${chalk.gray(agent.description)}`);
-    if (agent.model) {
-      console.log(`    ${chalk.dim('Model:')} ${agent.model}`);
-    }
-    if (agent.mcps && agent.mcps.length > 0) {
-      console.log(
-        `    ${chalk.dim('MCPs:')} ${agent.mcps.map((mcp: string) => chalk.magenta(mcp)).join(', ')}`
-      );
-    }
-    if (agent.tags && agent.tags.length > 0) {
-      console.log(
-        `    ${chalk.dim('Tags:')} ${agent.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
-      );
-    }
-  });
+    docs.forEach((doc) => {
+      const color = doc.color && colorMap[doc.color] ? colorMap[doc.color] : chalk.cyan;
+      console.log(`  ${color('•')} ${chalk.bold(doc.name)}`);
+      console.log(`    ${chalk.gray(doc.description)}`);
+      if (doc.category) {
+        console.log(`    ${chalk.dim('Category:')} ${doc.category}`);
+      }
+      if (doc.tags && doc.tags.length > 0) {
+        console.log(
+          `    ${chalk.dim('Tags:')} ${doc.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
+        );
+      }
+      console.log(`    ${chalk.dim('Usage:')} npx aicraft docs ${doc.name}`);
+    });
+  }
+
+  if (agents.length === 0 && docs.length === 0) {
+    console.log(chalk.yellow('No agents or documentation available'));
+  }
 }
 
 async function installAgent(agentName?: string) {

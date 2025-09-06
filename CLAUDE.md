@@ -12,7 +12,11 @@ AI Agent Package Manager for Claude - Install and manage AI agents
 
 You have access to specialized sub agents:
 
-No agents installed yet. Run `npx aicraft install [agent-name]` to add agents.
+### shadcn-ui-expert
+- **Usage**: Specialized in building and modifying user interfaces using shadcn/ui components and blocks
+- **MCPs**: shadcn-components, shadcn-themes
+- **Context**: Always pass session context file `.claude/tasks/context_session_x.md`
+- **Follow-up**: Read agent documentation in `.claude/doc/` before implementation
 
 ## Quick References
 
@@ -76,4 +80,4 @@ npx aicraft init
 
 ## Installed Agents
 
-No agents installed yet.
+- **shadcn-ui-expert**: Installed

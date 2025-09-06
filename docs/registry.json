@@ -14,7 +14,7 @@
       "filename": "docusaurus-setup.md",
       "description": "Create and modernize Docusaurus websites with contemporary design",
       "category": "development",
-      "color": "blue", 
+      "color": "blue",
       "tags": ["docusaurus", "website", "documentation", "react", "typescript", "modern"]
     }
   ]

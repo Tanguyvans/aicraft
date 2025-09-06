@@ -13,6 +13,7 @@ AI Agent Package Manager for Claude - Install and manage AI agents
 You have access to specialized sub agents:
 
 ### shadcn-ui-expert
+
 - **Usage**: Specialized in building and modifying user interfaces using shadcn/ui components and blocks
 - **MCPs**: shadcn-components, shadcn-themes
 - **Context**: Always pass session context file `.claude/tasks/context_session_x.md`
@@ -28,29 +29,37 @@ For specific deployment tasks, check these documentation files:
 ## Context Session Management
 
 ### Session File Format
+
 Location: `.claude/tasks/context_session_[id].md`
 
 ```markdown
 # Session [ID]: [Task Name]
 
 ## Overview
+
 Brief description of the main task or project goal.
 
 ## Progress Log
+
 - [Timestamp] [Agent]: [Action taken]
 - [Timestamp] Main: [Implementation completed]
 
 ## Current State
+
 What has been accomplished and what remains.
 
 ## Sub Agent Reports
+
 Links to documentation created by sub agents:
+
 - [Agent]: [.claude/doc/file.md] - [Summary]
 
 ## Next Steps
+
 What should be done next.
 
 ## Context for Future Agents
+
 Key information that other agents need to know.
 ```
 

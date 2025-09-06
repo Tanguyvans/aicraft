@@ -43,31 +43,32 @@ function TerminalCommands() {
   const [isTyping, setIsTyping] = useState(true);
 
   const commands = [
-    { 
-      command: 'npm install -g aicraft', 
+    {
+      command: 'npm install -g aicraft',
       description: 'Install AICraft globally',
-      output: '✅ AICraft installed successfully'
+      output: '✅ AICraft installed successfully',
     },
-    { 
-      command: 'npx aicraft list', 
+    {
+      command: 'npx aicraft list',
       description: 'View available agents',
-      output: 'Available agents:\n  • shadcn-ui-expert\n  • react-architect\n  • neo4j-expert\n  • docker-expert'
+      output:
+        'Available agents:\n  • shadcn-ui-expert\n  • react-architect\n  • neo4j-expert\n  • docker-expert',
     },
-    { 
-      command: 'npx aicraft install neo4j-expert', 
+    {
+      command: 'npx aicraft install neo4j-expert',
       description: 'Install specialized agent',
-      output: '✅ neo4j-expert installed'
+      output: '✅ neo4j-expert installed',
     },
-    { 
-      command: 'npx aicraft create my-agent', 
+    {
+      command: 'npx aicraft create my-agent',
       description: 'Create custom agent',
-      output: '🎯 Creating new agent scaffold...'
+      output: '🎯 Creating new agent scaffold...',
     },
-    { 
-      command: 'npx aicraft init', 
+    {
+      command: 'npx aicraft init',
       description: 'Initialize Claude workflow',
-      output: '🚀 Workspace initialized with Claude integration'
-    }
+      output: '🚀 Workspace initialized with Claude integration',
+    },
   ];
 
   useEffect(() => {
@@ -75,7 +76,7 @@ function TerminalCommands() {
 
     const currentCommand = commands[currentCommandIndex];
     const fullText = currentCommand.command;
-    
+
     if (displayedText.length < fullText.length) {
       const timeout = setTimeout(() => {
         setDisplayedText(fullText.slice(0, displayedText.length + 1));
@@ -101,7 +102,7 @@ function TerminalCommands() {
             Install and manage AI agents with simple CLI commands
           </p>
         </div>
-        
+
         <div className={styles.terminalWrapper}>
           <div className={styles.terminalHeader}>
             <div className={styles.terminalButtons}>
@@ -119,11 +120,13 @@ function TerminalCommands() {
                 <span className={styles.cursor}>|</span>
               </span>
             </div>
-            
+
             {displayedText === commands[currentCommandIndex]?.command && (
               <div className={styles.terminalOutput}>
                 {commands[currentCommandIndex].output.split('\n').map((line, idx) => (
-                  <div key={idx} className={styles.terminalOutputLine}>{line}</div>
+                  <div key={idx} className={styles.terminalOutputLine}>
+                    {line}
+                  </div>
                 ))}
               </div>
             )}
@@ -132,10 +135,10 @@ function TerminalCommands() {
 
         <div className={styles.commandGrid}>
           {commands.map((cmd, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={clsx(styles.commandCard, {
-                [styles.active]: idx === currentCommandIndex
+                [styles.active]: idx === currentCommandIndex,
               })}
               onClick={() => {
                 setCurrentCommandIndex(idx);
@@ -161,26 +164,26 @@ function AgentShowcase() {
       name: 'shadcn-ui-expert',
       description: 'Build beautiful UIs with shadcn/ui components',
       icon: '🎨',
-      tags: ['React', 'UI/UX', 'Components']
+      tags: ['React', 'UI/UX', 'Components'],
     },
     {
       name: 'react-architect',
       description: 'Design scalable React application architectures',
       icon: '🏗️',
-      tags: ['React', 'Architecture', 'Next.js']
+      tags: ['React', 'Architecture', 'Next.js'],
     },
     {
       name: 'neo4j-expert',
       description: 'Master graph databases and Cypher queries',
       icon: '🔗',
-      tags: ['Database', 'Graph', 'Cypher']
+      tags: ['Database', 'Graph', 'Cypher'],
     },
     {
       name: 'docker-expert',
       description: 'Containerization and orchestration specialist',
       icon: '🐳',
-      tags: ['Docker', 'DevOps', 'Containers']
-    }
+      tags: ['Docker', 'DevOps', 'Containers'],
+    },
   ];
 
   return (
@@ -194,7 +197,7 @@ function AgentShowcase() {
             Pre-configured experts for specific domains and technologies
           </p>
         </div>
-        
+
         <div className={styles.agentGrid}>
           {agents.map((agent, idx) => (
             <div key={idx} className={styles.agentCard}>
@@ -203,13 +206,13 @@ function AgentShowcase() {
               <p className={styles.agentDescription}>{agent.description}</p>
               <div className={styles.agentTags}>
                 {agent.tags.map((tag, tagIdx) => (
-                  <span key={tagIdx} className={styles.agentTag}>{tag}</span>
+                  <span key={tagIdx} className={styles.agentTag}>
+                    {tag}
+                  </span>
                 ))}
               </div>
               <div className={styles.agentActions}>
-                <button className={styles.installButton}>
-                  npx aicraft install {agent.name}
-                </button>
+                <button className={styles.installButton}>npx aicraft install {agent.name}</button>
               </div>
             </div>
           ))}

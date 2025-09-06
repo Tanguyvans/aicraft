@@ -119,7 +119,7 @@ function HomepageHeader() {
 const commands = [
   { command: 'npm install -g aicraft', description: 'Install globally' },
   { command: 'npx aicraft list', description: 'View agents' },
-  { command: 'npx aicraft install neo4j-expert', description: 'Install agent' }
+  { command: 'npx aicraft install neo4j-expert', description: 'Install agent' },
 ];
 ```
 

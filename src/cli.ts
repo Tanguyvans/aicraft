@@ -258,7 +258,10 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   await fs.writeJson(settingsPath, settings, { spaces: 2 });
 }
 
-async function manageClaudeFile(installedAgents: string[], installedDocs: string[] = []): Promise<void> {
+async function manageClaudeFile(
+  installedAgents: string[],
+  installedDocs: string[] = []
+): Promise<void> {
   const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
   const templatePath = path.join(__dirname, '..', 'agents', 'CLAUDE.md.template');
 
@@ -601,7 +604,9 @@ async function installDocLogic(selectedDoc: Doc, config: LocalConfig) {
     });
     await saveLocalConfig(updatedConfig);
 
-    downloadSpinner.succeed(chalk.green(`✓ Documentation "${selectedDoc.name}" installed successfully!`));
+    downloadSpinner.succeed(
+      chalk.green(`✓ Documentation "${selectedDoc.name}" installed successfully!`)
+    );
     console.log(chalk.dim(`Location: ${docPath}`));
     console.log(chalk.dim(`Category: ${selectedDoc.category || 'general'}`));
 

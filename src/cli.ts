@@ -258,6 +258,58 @@ async function updateClaudeSettings(mcpNames: string[]): Promise<void> {
   await fs.writeJson(settingsPath, settings, { spaces: 2 });
 }
 
+async function appendDocToClaude(docName: string, docDescription: string): Promise<void> {
+  const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
+
+  try {
+    // Check if CLAUDE.md exists
+    if (!(await fs.pathExists(claudeFilePath))) {
+      console.log(chalk.yellow('CLAUDE.md not found. Run "npx aicraft init" to create it.'));
+      return;
+    }
+
+    // Read current content
+    let content = await fs.readFile(claudeFilePath, 'utf-8');
+
+    // Check if Quick References section exists
+    if (!content.includes('## Quick References')) {
+      // Add Quick References section before the first ## section or at the end
+      const firstSectionIndex = content.indexOf('\n## ');
+      if (firstSectionIndex > -1) {
+        content =
+          content.slice(0, firstSectionIndex) +
+          '\n## Quick References\n\nFor specific deployment tasks, check these documentation files:\n' +
+          content.slice(firstSectionIndex);
+      } else {
+        content +=
+          '\n\n## Quick References\n\nFor specific deployment tasks, check these documentation files:\n';
+      }
+    }
+
+    // Find the Quick References section and add the doc reference
+    const quickRefPattern = /## Quick References[\s\S]*?(?=\n## |\n$)/;
+    const quickRefMatch = content.match(quickRefPattern);
+
+    if (quickRefMatch) {
+      const quickRefSection = quickRefMatch[0];
+      const docReference = `\n- **${docName}**: Available in \`docs/${docName}.md\` - ${docDescription}`;
+
+      // Check if doc is already referenced
+      if (!quickRefSection.includes(`**${docName}**:`)) {
+        const updatedSection = quickRefSection + docReference;
+        content = content.replace(quickRefPattern, updatedSection);
+
+        await fs.writeFile(claudeFilePath, content);
+        console.log(chalk.green(`✓ Added ${docName} reference to CLAUDE.md`));
+      } else {
+        console.log(chalk.yellow(`${docName} is already referenced in CLAUDE.md`));
+      }
+    }
+  } catch (error) {
+    console.error(chalk.yellow('Warning: Could not update CLAUDE.md file'), error);
+  }
+}
+
 async function manageClaudeFile(
   installedAgents: string[],
   installedDocs: string[] = []
@@ -285,10 +337,8 @@ async function manageClaudeFile(
     }
 
     // Generate sub agents section
-    const registry = await getMcpRegistry();
     const subAgentsContent = installedAgents
       .map((agentName) => {
-        const agent = agentName.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
         const mcps = getAgentMcps(agentName);
         return `### ${agentName}
 - **Usage**: Specialized in ${getAgentDescription(agentName)}
@@ -610,11 +660,8 @@ async function installDocLogic(selectedDoc: Doc, config: LocalConfig) {
     console.log(chalk.dim(`Location: ${docPath}`));
     console.log(chalk.dim(`Category: ${selectedDoc.category || 'general'}`));
 
-    // Update CLAUDE.md with new doc
-    const currentlyInstalledAgents = updatedConfig.installedAgents.map((a) => a.name);
-    const currentlyInstalledDocs = updatedConfig.installedDocs.map((d) => d.name);
-    await manageClaudeFile(currentlyInstalledAgents, currentlyInstalledDocs);
-    console.log(chalk.green('✓ Updated CLAUDE.md with documentation reference'));
+    // Update CLAUDE.md with new doc reference (only append, don't refactor)
+    await appendDocToClaude(selectedDoc.name, selectedDoc.description);
   } catch (error) {
     downloadSpinner.fail(chalk.red(`Failed to install documentation "${selectedDoc.name}"`));
     console.error(error);

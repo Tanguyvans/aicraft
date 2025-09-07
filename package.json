@@ -18,7 +18,7 @@
   "author": "Tanguy Vansnick",
   "type": "module",
   "bin": {
-    "aicraft": "./dist/cli.js"
+    "aicraft": "dist/cli.js"
   },
   "exports": {
     ".": {

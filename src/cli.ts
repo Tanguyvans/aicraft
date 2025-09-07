@@ -48,6 +48,31 @@ interface McpRegistry {
   mcpServers: Record<string, McpServer>;
 }
 
+interface McpItem {
+  name: string;
+  description: string;
+  package?: string;
+  category: string;
+  technologies?: string[];
+  setup_guide?: string;
+  auto_install?: boolean;
+  required_by?: string[];
+  color?: string;
+  tags: string[];
+  homepage?: string;
+  installation?: {
+    command: string;
+    args: string[];
+    config: {
+      mcpServers: Record<string, any>;
+    };
+  };
+}
+
+interface McpItemRegistry {
+  mcps: McpItem[];
+}
+
 interface LocalConfig {
   installPath: string;
   installedAgents: Array<{
@@ -59,6 +84,11 @@ interface LocalConfig {
     name: string;
     installedAt: string;
     location: string;
+  }>;
+  installedMcps?: Array<{
+    name: string;
+    installedAt: string;
+    package?: string;
   }>;
 }
 
@@ -187,6 +217,23 @@ async function getMcpRegistry(): Promise<McpRegistry> {
   } catch (error) {
     console.error(chalk.red('Failed to load MCP registry:'), error);
     return { version: '1.0.0', mcpServers: {} };
+  }
+}
+
+async function getMcpItemRegistry(): Promise<McpItem[]> {
+  try {
+    const mcpsDir = path.join(__dirname, '..', 'mcps');
+    const registryPath = path.join(mcpsDir, 'registry.json');
+
+    if (await fs.pathExists(registryPath)) {
+      const registry: McpItemRegistry = await fs.readJson(registryPath);
+      return registry.mcps || [];
+    }
+
+    return [];
+  } catch (error) {
+    console.error(chalk.red('Failed to load MCP items registry:'), error);
+    return [];
   }
 }
 
@@ -844,6 +891,104 @@ async function copyDocsToProject() {
   }
 }
 
+async function installMcpItem(mcpItem: McpItem): Promise<void> {
+  const config = await getLocalConfig();
+  
+  // Check if already installed
+  const installedMcps = config.installedMcps || [];
+  const existing = installedMcps.find((m) => m.name === mcpItem.name);
+  
+  if (existing) {
+    const { overwrite } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'overwrite',
+        message: `MCP server "${mcpItem.name}" is already installed. Reinstall?`,
+        default: false,
+      },
+    ]);
+
+    if (!overwrite) {
+      return;
+    }
+  }
+
+  const spinner = ora(`Installing MCP server ${mcpItem.name}...`).start();
+
+  try {
+    // Get the MCP configuration from mcp-registry.json
+    const mcpRegistry = await getMcpRegistry();
+    const mcpServer = mcpRegistry.mcpServers[mcpItem.name];
+    
+    if (!mcpServer) {
+      throw new Error(`MCP server configuration not found for ${mcpItem.name}`);
+    }
+
+    // Read existing MCP config or create new one
+    const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+    let existingConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
+
+    try {
+      if (await fs.pathExists(mcpConfigPath)) {
+        existingConfig = await fs.readJson(mcpConfigPath);
+      }
+    } catch (error) {
+      // Config doesn't exist or is invalid
+    }
+
+    // Add MCP server configuration
+    existingConfig.mcpServers[mcpItem.name] = {
+      type: mcpServer.type,
+      command: mcpServer.command,
+      args: mcpServer.args,
+      env: mcpServer.env,
+    };
+
+    // Save updated MCP config
+    await fs.writeJson(mcpConfigPath, existingConfig, { spaces: 2 });
+
+    // Update Claude settings
+    await updateClaudeSettings([mcpItem.name]);
+
+    // Update local config
+    const updatedConfig = await getLocalConfig();
+    updatedConfig.installedMcps = updatedConfig.installedMcps || [];
+    updatedConfig.installedMcps = updatedConfig.installedMcps.filter(
+      (m) => m.name !== mcpItem.name
+    );
+    updatedConfig.installedMcps.push({
+      name: mcpItem.name,
+      installedAt: new Date().toISOString(),
+      package: mcpItem.package,
+    });
+    await saveLocalConfig(updatedConfig);
+
+    spinner.succeed(chalk.green(`✓ MCP server "${mcpItem.name}" installed successfully!`));
+    console.log(chalk.dim(`Category: ${mcpItem.category}`));
+    if (mcpItem.tags && mcpItem.tags.length > 0) {
+      console.log(chalk.dim(`Tags: ${mcpItem.tags.join(', ')}`));
+    }
+    if (mcpItem.homepage) {
+      console.log(chalk.dim(`Homepage: ${mcpItem.homepage}`));
+    }
+
+    // Copy setup guide if available
+    if (mcpItem.setup_guide) {
+      const guideSource = path.join(__dirname, '..', 'mcps', mcpItem.setup_guide);
+      const guideDest = path.join(process.cwd(), 'docs', `mcp-${mcpItem.name}.md`);
+      
+      if (await fs.pathExists(guideSource)) {
+        await fs.ensureDir(path.dirname(guideDest));
+        await fs.copyFile(guideSource, guideDest);
+        console.log(chalk.green(`✓ Setup guide copied to docs/mcp-${mcpItem.name}.md`));
+      }
+    }
+  } catch (error) {
+    spinner.fail(chalk.red(`Failed to install MCP server "${mcpItem.name}"`));
+    console.error(error);
+  }
+}
+
 async function showInstalledAgents() {
   const config = await getLocalConfig();
 
@@ -924,6 +1069,236 @@ program
   .description('Show documentation (list all or display specific doc)')
   .action(showDocs);
 
+// MCP commands
+const mcpCommand = program
+  .command('mcp')
+  .description('Manage MCP (Model Context Protocol) servers');
+
+mcpCommand
+  .command('list')
+  .alias('ls')
+  .description('List all available MCP servers')
+  .action(async () => {
+    const spinner = ora('Loading MCP servers...').start();
+    const mcpItems = await getMcpItemRegistry();
+    spinner.stop();
+
+    if (mcpItems.length === 0) {
+      console.log(chalk.yellow('No MCP servers available'));
+      return;
+    }
+
+    const colorMap: Record<string, any> = {
+      green: chalk.green,
+      blue: chalk.blue,
+      yellow: chalk.yellow,
+      red: chalk.red,
+      magenta: chalk.magenta,
+      cyan: chalk.cyan,
+      purple: chalk.magenta,
+      orange: chalk.rgb(255, 165, 0),
+    };
+
+    console.log(chalk.cyan('\n🔌 Available MCP Servers:\n'));
+
+    mcpItems.forEach((mcp) => {
+      const color = mcp.color && colorMap[mcp.color] ? colorMap[mcp.color] : chalk.blue;
+      console.log(`  ${color('•')} ${chalk.bold(mcp.name)}`);
+      console.log(`    ${chalk.gray(mcp.description)}`);
+      console.log(`    ${chalk.dim('Category:')} ${mcp.category}`);
+      if (mcp.technologies && mcp.technologies.length > 0) {
+        console.log(`    ${chalk.dim('Technologies:')} ${mcp.technologies.join(', ')}`);
+      }
+      if (mcp.tags && mcp.tags.length > 0) {
+        console.log(
+          `    ${chalk.dim('Tags:')} ${mcp.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
+        );
+      }
+      if (mcp.required_by && mcp.required_by.length > 0) {
+        console.log(
+          `    ${chalk.dim('Required by:')} ${mcp.required_by.map((a: string) => chalk.yellow(a)).join(', ')}`
+        );
+      }
+    });
+  });
+
+mcpCommand
+  .command('install [mcp-name]')
+  .alias('i')
+  .description('Install an MCP server')
+  .action(async (mcpName?: string) => {
+    const spinner = ora('Loading MCP registry...').start();
+    const mcpItems = await getMcpItemRegistry();
+    spinner.stop();
+
+    if (mcpItems.length === 0) {
+      console.log(chalk.red('No MCP servers available'));
+      return;
+    }
+
+    let selectedMcp: McpItem;
+
+    if (mcpName) {
+      const mcp = mcpItems.find((m) => m.name === mcpName);
+      if (!mcp) {
+        console.log(chalk.red(`MCP server "${mcpName}" not found`));
+        console.log(chalk.dim('Run "npx aicraft mcp list" to see available MCP servers'));
+        return;
+      }
+      selectedMcp = mcp;
+    } else {
+      // Interactive selection
+      const choices = mcpItems.map((m) => ({
+        name: `🔌 ${m.name} - ${m.description}`,
+        value: m,
+      }));
+
+      const { selection } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: 'Select an MCP server to install:',
+          choices,
+        },
+      ]);
+      selectedMcp = selection;
+    }
+
+    await installMcpItem(selectedMcp);
+  });
+
+mcpCommand
+  .command('status')
+  .alias('installed')
+  .description('Show installed MCP servers')
+  .action(async () => {
+    const config = await getLocalConfig();
+    const installedMcps = config.installedMcps || [];
+
+    if (installedMcps.length === 0) {
+      console.log(chalk.yellow('No MCP servers installed'));
+      return;
+    }
+
+    console.log(chalk.cyan('\n🔌 Installed MCP Servers:\n'));
+
+    // Also read the .mcp.json to get current configuration
+    const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+    let mcpConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
+    
+    try {
+      if (await fs.pathExists(mcpConfigPath)) {
+        mcpConfig = await fs.readJson(mcpConfigPath);
+      }
+    } catch (error) {
+      // Config doesn't exist or is invalid
+    }
+
+    for (const mcp of installedMcps) {
+      console.log(`${chalk.blue('•')} ${chalk.bold(mcp.name)}`);
+      if (mcp.package) {
+        console.log(`  ${chalk.dim('Package:')} ${mcp.package}`);
+      }
+      console.log(
+        `  ${chalk.dim('Installed:')} ${new Date(mcp.installedAt).toLocaleDateString()}`
+      );
+      
+      // Show configuration if available
+      if (mcpConfig.mcpServers[mcp.name]) {
+        const config = mcpConfig.mcpServers[mcp.name];
+        console.log(`  ${chalk.dim('Command:')} ${config.command} ${config.args?.join(' ') || ''}`);
+      }
+    }
+  });
+
+mcpCommand
+  .command('remove [mcp-name]')
+  .alias('rm')
+  .description('Remove an installed MCP server')
+  .action(async (mcpName?: string) => {
+    const config = await getLocalConfig();
+    const installedMcps = config.installedMcps || [];
+
+    if (installedMcps.length === 0) {
+      console.log(chalk.yellow('No MCP servers installed'));
+      return;
+    }
+
+    let selectedMcp: string;
+
+    if (mcpName) {
+      const mcp = installedMcps.find((m) => m.name === mcpName);
+      if (!mcp) {
+        console.log(chalk.red(`MCP server "${mcpName}" is not installed`));
+        return;
+      }
+      selectedMcp = mcpName;
+    } else {
+      // Interactive selection
+      const choices = installedMcps.map((m) => ({
+        name: m.name,
+        value: m.name,
+      }));
+
+      const { selection } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: 'Select an MCP server to remove:',
+          choices,
+        },
+      ]);
+      selectedMcp = selection;
+    }
+
+    const { confirm } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `Are you sure you want to remove MCP server "${selectedMcp}"?`,
+        default: false,
+      },
+    ]);
+
+    if (!confirm) {
+      return;
+    }
+
+    const spinner = ora(`Removing MCP server ${selectedMcp}...`).start();
+
+    try {
+      // Remove from .mcp.json
+      const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+      if (await fs.pathExists(mcpConfigPath)) {
+        const mcpConfig = await fs.readJson(mcpConfigPath);
+        delete mcpConfig.mcpServers[selectedMcp];
+        await fs.writeJson(mcpConfigPath, mcpConfig, { spaces: 2 });
+      }
+
+      // Remove from Claude settings
+      const settingsPath = path.join(process.cwd(), '.claude', 'settings.local.json');
+      if (await fs.pathExists(settingsPath)) {
+        const settings = await fs.readJson(settingsPath);
+        settings.enabledMcpjsonServers = settings.enabledMcpjsonServers.filter(
+          (s: string) => s !== selectedMcp
+        );
+        await fs.writeJson(settingsPath, settings, { spaces: 2 });
+      }
+
+      // Update local config
+      const updatedConfig = await getLocalConfig();
+      updatedConfig.installedMcps = (updatedConfig.installedMcps || []).filter(
+        (m) => m.name !== selectedMcp
+      );
+      await saveLocalConfig(updatedConfig);
+
+      spinner.succeed(chalk.green(`✓ MCP server "${selectedMcp}" removed successfully!`));
+    } catch (error) {
+      spinner.fail(chalk.red(`Failed to remove MCP server "${selectedMcp}"`));
+      console.error(error);
+    }
+  });
+
 // Default action - show interactive menu or handle global options
 program.action(async (options) => {
   // Handle global --list option
@@ -943,6 +1318,7 @@ program.action(async (options) => {
         { name: '🚀 Initialize project', value: 'init' },
         { name: '📦 Browse available agents', value: 'list' },
         { name: '⬇️  Install an agent', value: 'install' },
+        { name: '🔌 Manage MCP servers', value: 'mcp' },
         { name: '✨ Create new agent', value: 'create' },
         { name: '📋 Show installed agents', value: 'installed' },
         { name: '📚 Show documentation', value: 'docs' },
@@ -960,6 +1336,172 @@ program.action(async (options) => {
       break;
     case 'install':
       await installAgent();
+      break;
+    case 'mcp':
+      // Show MCP submenu
+      const { mcpAction } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'mcpAction',
+          message: 'MCP Server Management:',
+          choices: [
+            { name: '📋 List available MCP servers', value: 'list' },
+            { name: '⬇️  Install MCP server', value: 'install' },
+            { name: '🔍 Show installed MCP servers', value: 'status' },
+            { name: '🗑️  Remove MCP server', value: 'remove' },
+            { name: '⬅️  Back to main menu', value: 'back' },
+          ],
+        },
+      ]);
+
+      if (mcpAction !== 'back') {
+        switch (mcpAction) {
+          case 'list': {
+            const mcpItems = await getMcpItemRegistry();
+            if (mcpItems.length === 0) {
+              console.log(chalk.yellow('No MCP servers available'));
+              break;
+            }
+
+            const colorMap: Record<string, any> = {
+              green: chalk.green,
+              blue: chalk.blue,
+              yellow: chalk.yellow,
+              red: chalk.red,
+              magenta: chalk.magenta,
+              cyan: chalk.cyan,
+              purple: chalk.magenta,
+            };
+
+            console.log(chalk.cyan('\n🔌 Available MCP Servers:\n'));
+
+            mcpItems.forEach((mcp) => {
+              const color = mcp.color && colorMap[mcp.color] ? colorMap[mcp.color] : chalk.blue;
+              console.log(`  ${color('•')} ${chalk.bold(mcp.name)}`);
+              console.log(`    ${chalk.gray(mcp.description)}`);
+              console.log(`    ${chalk.dim('Category:')} ${mcp.category}`);
+              if (mcp.tags && mcp.tags.length > 0) {
+                console.log(
+                  `    ${chalk.dim('Tags:')} ${mcp.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ')}`
+                );
+              }
+            });
+            break;
+          }
+          case 'install': {
+            const mcpItems = await getMcpItemRegistry();
+            if (mcpItems.length > 0) {
+              const choices = mcpItems.map((m) => ({
+                name: `🔌 ${m.name} - ${m.description}`,
+                value: m,
+              }));
+
+              const { selection } = await inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'selection',
+                  message: 'Select an MCP server to install:',
+                  choices,
+                },
+              ]);
+              await installMcpItem(selection);
+            } else {
+              console.log(chalk.red('No MCP servers available'));
+            }
+            break;
+          }
+          case 'status': {
+            const config = await getLocalConfig();
+            const installedMcps = config.installedMcps || [];
+
+            if (installedMcps.length === 0) {
+              console.log(chalk.yellow('No MCP servers installed'));
+              break;
+            }
+
+            console.log(chalk.cyan('\n🔌 Installed MCP Servers:\n'));
+
+            for (const mcp of installedMcps) {
+              console.log(`${chalk.blue('•')} ${chalk.bold(mcp.name)}`);
+              if (mcp.package) {
+                console.log(`  ${chalk.dim('Package:')} ${mcp.package}`);
+              }
+              console.log(
+                `  ${chalk.dim('Installed:')} ${new Date(mcp.installedAt).toLocaleDateString()}`
+              );
+            }
+            break;
+          }
+          case 'remove': {
+            const config = await getLocalConfig();
+            const installedMcps = config.installedMcps || [];
+
+            if (installedMcps.length === 0) {
+              console.log(chalk.yellow('No MCP servers installed'));
+              break;
+            }
+
+            const choices = installedMcps.map((m) => ({
+              name: m.name,
+              value: m.name,
+            }));
+
+            const { selection } = await inquirer.prompt([
+              {
+                type: 'list',
+                name: 'selection',
+                message: 'Select an MCP server to remove:',
+                choices,
+              },
+            ]);
+
+            const { confirm } = await inquirer.prompt([
+              {
+                type: 'confirm',
+                name: 'confirm',
+                message: `Are you sure you want to remove MCP server "${selection}"?`,
+                default: false,
+              },
+            ]);
+
+            if (confirm) {
+              const spinner = ora(`Removing MCP server ${selection}...`).start();
+              try {
+                // Remove from .mcp.json
+                const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
+                if (await fs.pathExists(mcpConfigPath)) {
+                  const mcpConfig = await fs.readJson(mcpConfigPath);
+                  delete mcpConfig.mcpServers[selection];
+                  await fs.writeJson(mcpConfigPath, mcpConfig, { spaces: 2 });
+                }
+
+                // Remove from Claude settings
+                const settingsPath = path.join(process.cwd(), '.claude', 'settings.local.json');
+                if (await fs.pathExists(settingsPath)) {
+                  const settings = await fs.readJson(settingsPath);
+                  settings.enabledMcpjsonServers = settings.enabledMcpjsonServers.filter(
+                    (s: string) => s !== selection
+                  );
+                  await fs.writeJson(settingsPath, settings, { spaces: 2 });
+                }
+
+                // Update local config
+                const updatedConfig = await getLocalConfig();
+                updatedConfig.installedMcps = (updatedConfig.installedMcps || []).filter(
+                  (m) => m.name !== selection
+                );
+                await saveLocalConfig(updatedConfig);
+
+                spinner.succeed(chalk.green(`✓ MCP server "${selection}" removed successfully!`));
+              } catch (error) {
+                spinner.fail(chalk.red(`Failed to remove MCP server "${selection}"`));
+                console.error(error);
+              }
+            }
+            break;
+          }
+        }
+      }
       break;
     case 'create':
       await createAgent();

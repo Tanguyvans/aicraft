@@ -1,0 +1,134 @@
+{
+  "mcps": [
+    {
+      "name": "shadcn-components",
+      "description": "Access shadcn/ui components and blocks directly in Claude Code",
+      "package": "@anthropic-ai/shadcn-components",
+      "category": "ui",
+      "technologies": ["react", "typescript", "tailwind"],
+      "setup_guide": "shadcn-components.md",
+      "auto_install": true,
+      "required_by": ["shadcn-ui-expert"],
+      "color": "blue",
+      "tags": ["components", "ui", "react"],
+      "homepage": "https://github.com/anthropics/mcp-shadcn",
+      "installation": {
+        "command": "npm",
+        "args": ["install", "-g", "@anthropic-ai/shadcn-components"],
+        "config": {
+          "mcpServers": {
+            "shadcn-components": {
+              "command": "npx",
+              "args": ["@anthropic-ai/shadcn-components"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "shadcn-themes",
+      "description": "Create and manage shadcn/ui themes and configurations",
+      "package": "@anthropic-ai/shadcn-themes",
+      "category": "ui",
+      "technologies": ["react", "typescript", "tailwind", "themes"],
+      "setup_guide": "shadcn-themes.md",
+      "auto_install": true,
+      "required_by": ["shadcn-ui-expert"],
+      "color": "purple",
+      "tags": ["themes", "styling", "tailwind"],
+      "homepage": "https://github.com/anthropics/mcp-shadcn-themes",
+      "installation": {
+        "command": "npm",
+        "args": ["install", "-g", "@anthropic-ai/shadcn-themes"],
+        "config": {
+          "mcpServers": {
+            "shadcn-themes": {
+              "command": "npx",
+              "args": ["@anthropic-ai/shadcn-themes"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "playwright",
+      "description": "Browser automation and testing with Playwright",
+      "package": "@playwright/mcp",
+      "category": "testing",
+      "technologies": ["testing", "automation", "browser"],
+      "setup_guide": "playwright.md",
+      "auto_install": false,
+      "required_by": [],
+      "color": "green",
+      "tags": ["testing", "browser", "automation"],
+      "homepage": "https://github.com/microsoft/playwright",
+      "installation": {
+        "command": "npx",
+        "args": ["@playwright/mcp@latest"],
+        "config": {
+          "mcpServers": {
+            "playwright": {
+              "command": "npx",
+              "args": ["@playwright/mcp@latest"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "neo4j-database",
+      "description": "Connect to and query Neo4j graph databases",
+      "package": "@anthropic-ai/mcp-neo4j",
+      "category": "database",
+      "technologies": ["neo4j", "cypher", "graph"],
+      "setup_guide": "neo4j-database.md",
+      "auto_install": false,
+      "required_by": ["neo4j-expert"],
+      "color": "cyan",
+      "tags": ["database", "graph", "cypher"],
+      "homepage": "https://github.com/anthropics/mcp-neo4j",
+      "installation": {
+        "command": "npm",
+        "args": ["install", "-g", "@anthropic-ai/mcp-neo4j"],
+        "config": {
+          "mcpServers": {
+            "neo4j": {
+              "command": "npx",
+              "args": ["@anthropic-ai/mcp-neo4j"],
+              "env": {
+                "NEO4J_URI": "bolt://localhost:7687",
+                "NEO4J_USERNAME": "neo4j",
+                "NEO4J_PASSWORD": "password"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "filesystem",
+      "description": "Enhanced file system operations and management",
+      "package": "@anthropic-ai/mcp-filesystem",
+      "category": "system",
+      "technologies": ["filesystem", "files", "operations"],
+      "setup_guide": "filesystem.md",
+      "auto_install": false,
+      "required_by": [],
+      "color": "yellow",
+      "tags": ["filesystem", "files", "system"],
+      "homepage": "https://github.com/anthropics/mcp-filesystem",
+      "installation": {
+        "command": "npm",
+        "args": ["install", "-g", "@anthropic-ai/mcp-filesystem"],
+        "config": {
+          "mcpServers": {
+            "filesystem": {
+              "command": "npx",
+              "args": ["@anthropic-ai/mcp-filesystem"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

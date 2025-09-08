@@ -1,14 +1,17 @@
 # playwright MCP
 
 ## Overview
+
 The playwright MCP provides browser automation and testing capabilities within Claude Code, enabling web scraping, UI testing, and automated browser interactions.
 
 ## Description
+
 Automate Chromium, Firefox, and Safari browsers for testing, scraping, and interaction tasks. Create screenshots, PDFs, test user interfaces, and perform complex browser automation workflows.
 
 ## Installation
 
 ### Manual Installation
+
 ```bash
 # Install the MCP package globally
 npm install -g @anthropic-ai/mcp-playwright
@@ -21,7 +24,9 @@ npx playwright install
 ```
 
 ### Browser Requirements
+
 Playwright requires browser binaries to be installed:
+
 ```bash
 # Install all browsers
 npx playwright install
@@ -35,6 +40,7 @@ npx playwright install webkit
 ## Configuration
 
 ### Claude Desktop
+
 Add to your Claude Desktop configuration file:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -52,29 +58,34 @@ Add to your Claude Desktop configuration file:
 ```
 
 ### Claude Code
+
 The MCP will be automatically configured when installed via aicraft.
 
 ## Features
 
 ### Browser Automation
+
 - **Multi-Browser Support**: Chromium, Firefox, Safari/WebKit
 - **Page Navigation**: Go to URLs, handle redirects, wait for loads
 - **Element Interaction**: Click, type, scroll, hover actions
 - **Form Handling**: Fill forms, submit data, handle file uploads
 
 ### Content Extraction
+
 - **Text Extraction**: Get page content, specific elements
 - **Screenshot Capture**: Full page or element screenshots
 - **PDF Generation**: Convert pages to PDF documents
 - **Data Scraping**: Extract structured data from websites
 
 ### Testing Capabilities
+
 - **UI Testing**: Verify page elements, content, behavior
 - **Performance Testing**: Measure load times, resource usage
 - **Accessibility Testing**: Check ARIA labels, keyboard navigation
 - **Visual Regression**: Compare screenshots across versions
 
 ### Advanced Features
+
 - **Network Interception**: Monitor requests, mock responses
 - **Mobile Emulation**: Test responsive designs, touch interactions
 - **Geolocation**: Test location-based features
@@ -83,6 +94,7 @@ The MCP will be automatically configured when installed via aicraft.
 ## Usage Examples
 
 ### Basic Navigation
+
 ```javascript
 // Navigate to a page and take screenshot
 await page.goto('https://example.com');
@@ -90,6 +102,7 @@ await page.screenshot({ path: 'example.png' });
 ```
 
 ### Data Extraction
+
 ```bash
 # Ask Claude to scrape data
 "Extract all product names and prices from this e-commerce site"
@@ -98,6 +111,7 @@ await page.screenshot({ path: 'example.png' });
 ```
 
 ### UI Testing
+
 ```bash
 # Test user interactions
 "Test the login form with valid credentials"
@@ -106,6 +120,7 @@ await page.screenshot({ path: 'example.png' });
 ```
 
 ### Automation Tasks
+
 ```bash
 # Automated workflows
 "Fill out this contact form with test data"
@@ -116,6 +131,7 @@ await page.screenshot({ path: 'example.png' });
 ## Browser Configuration
 
 ### Headless vs Headed Mode
+
 ```javascript
 // Headless (default) - no UI
 const browser = await playwright.chromium.launch({ headless: true });
@@ -125,6 +141,7 @@ const browser = await playwright.chromium.launch({ headless: false });
 ```
 
 ### Browser Options
+
 ```javascript
 const browser = await playwright.chromium.launch({
   headless: true,
@@ -138,6 +155,7 @@ const browser = await playwright.chromium.launch({
 ### Common Issues
 
 **❌ "Browser executable not found"**
+
 ```bash
 # Solution: Install browser binaries
 npx playwright install chromium
@@ -147,6 +165,7 @@ npx playwright install --help
 ```
 
 **❌ "Permission denied errors"**
+
 ```bash
 # Linux: Install dependencies
 sudo apt-get install -y \
@@ -158,6 +177,7 @@ sudo apt-get install -y \
 ```
 
 **❌ "Timeout errors"**
+
 ```bash
 # Increase timeouts
 await page.waitForSelector('#element', { timeout: 30000 });
@@ -167,6 +187,7 @@ await page.waitForSelector('#element', { timeout: 30000 });
 ```
 
 **❌ "Element not found"**
+
 ```bash
 # Use more robust selectors
 await page.waitForSelector('[data-testid="submit-button"]');
@@ -177,14 +198,15 @@ await frame.click('#button');
 ```
 
 ### Debugging Tips
+
 ```bash
 # Run with debug logging
 DEBUG=pw:api npx @anthropic-ai/mcp-playwright
 
 # Use slow motion for debugging
-const browser = await playwright.chromium.launch({ 
-  headless: false, 
-  slowMo: 1000 
+const browser = await playwright.chromium.launch({
+  headless: false,
+  slowMo: 1000
 });
 
 # Enable tracing
@@ -194,25 +216,26 @@ await context.tracing.start({ screenshots: true, snapshots: true });
 ## Performance Optimization
 
 ### Resource Management
+
 ```javascript
 // Close contexts and browsers
 await context.close();
 await browser.close();
 
 // Disable images for faster loading
-await context.route('**/*.{png,jpg,jpeg}', route => route.abort());
+await context.route('**/*.{png,jpg,jpeg}', (route) => route.abort());
 ```
 
 ### Parallel Execution
+
 ```javascript
 // Run multiple pages in parallel
-const promises = urls.map(url => 
-  browser.newPage().then(page => page.goto(url))
-);
+const promises = urls.map((url) => browser.newPage().then((page) => page.goto(url)));
 await Promise.all(promises);
 ```
 
 ## Security Considerations
+
 - Be respectful of websites' robots.txt and rate limits
 - Don't scrape copyrighted content without permission
 - Use appropriate delays between requests
@@ -220,6 +243,7 @@ await Promise.all(promises);
 - Be aware of anti-bot measures (CAPTCHA, rate limiting)
 
 ## Docker Usage
+
 ```dockerfile
 FROM mcr.microsoft.com/playwright:v1.40.0-focal
 
@@ -233,6 +257,7 @@ CMD ["node", "script.js"]
 ```
 
 ## Compatible Use Cases
+
 - **Web Scraping**: Extract data from websites
 - **UI Testing**: Automated testing of web applications
 - **Report Generation**: Create PDFs from web content
@@ -240,10 +265,12 @@ CMD ["node", "script.js"]
 - **Data Collection**: Gather information from multiple sources
 
 ## Related MCPs
+
 - **filesystem**: For saving screenshots, PDFs, and scraped data
 - **web-search**: For finding URLs to automate or test
 
 ## Support
+
 - Playwright Documentation: [playwright.dev](https://playwright.dev)
 - API Reference: [playwright.dev/docs/api](https://playwright.dev/docs/api)
 - GitHub Issues: [github.com/microsoft/playwright](https://github.com/microsoft/playwright)

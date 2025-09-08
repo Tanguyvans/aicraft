@@ -357,6 +357,150 @@ async function appendDocToClaude(docName: string, docDescription: string): Promi
   }
 }
 
+async function addVisualDevelopmentSection(claudeFilePath: string): Promise<void> {
+  try {
+    let content = await fs.readFile(claudeFilePath, 'utf-8');
+    
+    // Check if Visual Development & Testing section already exists
+    if (content.includes('## Visual Development & Testing')) {
+      return;
+    }
+
+    const visualDevSection = `
+## Visual Development & Testing
+
+### Design System
+
+The project follows S-Tier SaaS design standards inspired by Stripe, Airbnb, and Linear. All UI development must adhere to:
+
+- **Design Principles**: \`/context/design-principles.md\` - Comprehensive checklist for world-class UI
+- **Component Library**: NextUI with custom Tailwind configuration
+
+### Quick Visual Check
+
+**IMMEDIATELY after implementing any front-end change:**
+
+1. **Identify what changed** - Review the modified components/pages
+2. **Navigate to affected pages** - Use \`mcp__playwright__browser_navigate\` to visit each changed view
+3. **Verify design compliance** - Compare against \`/context/design-principles.md\`
+4. **Validate feature implementation** - Ensure the change fulfills the user's specific request
+5. **Check acceptance criteria** - Review any provided context files or requirements
+6. **Capture evidence** - Take full page screenshot at desktop viewport (1440px) of each changed view
+7. **Check for errors** - Run \`mcp__playwright__browser_console_messages\` ⚠️
+
+This verification ensures changes meet design standards and user requirements.
+
+### Comprehensive Design Review
+
+For significant UI changes or before merging PRs, use the design review agent:
+
+\`\`\`bash
+# Option 1: Use the slash command
+/design-review
+
+# Option 2: Invoke the agent directly
+@agent-design-review
+\`\`\`
+
+The design review agent will:
+
+- Test all interactive states and user flows
+- Verify responsiveness (desktop/tablet/mobile)
+- Check accessibility (WCAG 2.1 AA compliance)
+- Validate visual polish and consistency
+- Test edge cases and error states
+- Provide categorized feedback (Blockers/High/Medium/Nitpicks)
+
+### Playwright MCP Integration
+
+#### Essential Commands for UI Testing
+
+\`\`\`javascript
+// Navigation & Screenshots
+mcp__playwright__browser_navigate(url); // Navigate to page
+mcp__playwright__browser_take_screenshot(); // Capture visual evidence
+mcp__playwright__browser_resize(
+  width,
+  height
+); // Test responsiveness
+
+// Interaction Testing
+mcp__playwright__browser_click(element); // Test clicks
+mcp__playwright__browser_type(
+  element,
+  text
+); // Test input
+mcp__playwright__browser_hover(element); // Test hover states
+
+// Validation
+mcp__playwright__browser_console_messages(); // Check for errors
+mcp__playwright__browser_snapshot(); // Accessibility check
+mcp__playwright__browser_wait_for(
+  text / element
+); // Ensure loading
+\`\`\`
+
+### Design Compliance Checklist
+
+When implementing UI features, verify:
+
+- [ ] **Visual Hierarchy**: Clear focus flow, appropriate spacing
+- [ ] **Consistency**: Uses design tokens, follows patterns
+- [ ] **Responsiveness**: Works on mobile (375px), tablet (768px), desktop (1440px)
+- [ ] **Accessibility**: Keyboard navigable, proper contrast, semantic HTML
+- [ ] **Performance**: Fast load times, smooth animations (150-300ms)
+- [ ] **Error Handling**: Clear error states, helpful messages
+- [ ] **Polish**: Micro-interactions, loading states, empty states
+
+## When to Use Automated Visual Testing
+
+### Use Quick Visual Check for
+
+- Every front-end change, no matter how small
+- After implementing new components or features
+- When modifying existing UI elements
+- After fixing visual bugs
+- Before committing UI changes
+
+### Use Comprehensive Design Review for
+
+- Major feature implementations
+- Before creating pull requests with UI changes
+- When refactoring component architecture
+- After significant design system updates
+- When accessibility compliance is critical
+
+### Skip Visual Testing for
+
+- Backend-only changes (API, database)
+- Configuration file updates
+- Documentation changes
+- Test file modifications
+- Non-visual utility functions
+
+## Additional Context
+
+- Design review agent configuration: \`/.claude/agents/design-review-agent.md\`
+- Design principles checklist: \`/context/design-principles.md\`
+- Custom slash commands: \`/context/design-review-slash-command.md\`
+
+`;
+
+    // Add the section before the first ## section or at the end
+    const firstSectionIndex = content.indexOf('\n## ', content.indexOf('## Installed Agents') + 1);
+    if (firstSectionIndex > -1) {
+      content = content.slice(0, firstSectionIndex) + visualDevSection + content.slice(firstSectionIndex);
+    } else {
+      content += visualDevSection;
+    }
+
+    await fs.writeFile(claudeFilePath, content);
+    console.log(chalk.green('✓ Added Visual Development & Testing section to CLAUDE.md'));
+  } catch (error) {
+    console.error(chalk.yellow('Warning: Could not add Visual Development section to CLAUDE.md'), error);
+  }
+}
+
 async function manageClaudeFile(
   installedAgents: string[],
   installedDocs: string[] = []
@@ -434,6 +578,7 @@ function getAgentDescription(agentName: string): string {
     'docker-expert': 'containerizing applications and designing container orchestration strategies',
     'react-architect':
       'designing and optimizing React applications with modern patterns and Next.js',
+    'design-review': 'conducting comprehensive design reviews on front-end pull requests or UI changes with automated testing',
   };
   return descriptions[agentName] || 'specialized tasks';
 }
@@ -445,6 +590,7 @@ function getAgentMcps(agentName: string): string[] {
     'api-designer': [],
     'docker-expert': [],
     'react-architect': [],
+    'design-review': ['playwright'],
   };
   return mcpMap[agentName] || [];
 }
@@ -645,6 +791,12 @@ async function installAgentLogic(selectedAgent: Agent, config: LocalConfig) {
     const currentlyInstalledDocs = updatedConfig.installedDocs.map((d) => d.name);
     await manageClaudeFile(currentlyInstalled, currentlyInstalledDocs);
     console.log(chalk.green('✓ Updated CLAUDE.md with agent configuration'));
+
+    // Add Visual Development & Testing section if design-review agent is installed
+    if (selectedAgent.name === 'design-review') {
+      const claudeFilePath = path.join(process.cwd(), 'CLAUDE.md');
+      await addVisualDevelopmentSection(claudeFilePath);
+    }
   } catch (error) {
     downloadSpinner.fail(chalk.red(`Failed to install agent "${selectedAgent.name}"`));
     console.error(error);
@@ -893,11 +1045,11 @@ async function copyDocsToProject() {
 
 async function installMcpItem(mcpItem: McpItem): Promise<void> {
   const config = await getLocalConfig();
-  
+
   // Check if already installed
   const installedMcps = config.installedMcps || [];
   const existing = installedMcps.find((m) => m.name === mcpItem.name);
-  
+
   if (existing) {
     const { overwrite } = await inquirer.prompt([
       {
@@ -919,7 +1071,7 @@ async function installMcpItem(mcpItem: McpItem): Promise<void> {
     // Get the MCP configuration from mcp-registry.json
     const mcpRegistry = await getMcpRegistry();
     const mcpServer = mcpRegistry.mcpServers[mcpItem.name];
-    
+
     if (!mcpServer) {
       throw new Error(`MCP server configuration not found for ${mcpItem.name}`);
     }
@@ -976,7 +1128,7 @@ async function installMcpItem(mcpItem: McpItem): Promise<void> {
     if (mcpItem.setup_guide) {
       const guideSource = path.join(__dirname, '..', 'mcps', mcpItem.setup_guide);
       const guideDest = path.join(process.cwd(), 'docs', `mcp-${mcpItem.name}.md`);
-      
+
       if (await fs.pathExists(guideSource)) {
         await fs.ensureDir(path.dirname(guideDest));
         await fs.copyFile(guideSource, guideDest);
@@ -1185,7 +1337,7 @@ mcpCommand
     // Also read the .mcp.json to get current configuration
     const mcpConfigPath = path.join(process.cwd(), '.mcp.json');
     let mcpConfig: { mcpServers: Record<string, any> } = { mcpServers: {} };
-    
+
     try {
       if (await fs.pathExists(mcpConfigPath)) {
         mcpConfig = await fs.readJson(mcpConfigPath);
@@ -1199,10 +1351,8 @@ mcpCommand
       if (mcp.package) {
         console.log(`  ${chalk.dim('Package:')} ${mcp.package}`);
       }
-      console.log(
-        `  ${chalk.dim('Installed:')} ${new Date(mcp.installedAt).toLocaleDateString()}`
-      );
-      
+      console.log(`  ${chalk.dim('Installed:')} ${new Date(mcp.installedAt).toLocaleDateString()}`);
+
       // Show configuration if available
       if (mcpConfig.mcpServers[mcp.name]) {
         const config = mcpConfig.mcpServers[mcp.name];

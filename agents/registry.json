@@ -45,6 +45,15 @@
       "color": "cyan",
       "tags": ["react", "nextjs", "vite", "typescript", "architecture", "hooks", "performance"],
       "mcps": []
+    },
+    {
+      "name": "design-review",
+      "filename": "design-review.md",
+      "description": "Conduct comprehensive design reviews on front-end pull requests or UI changes with automated testing",
+      "model": "sonnet",
+      "color": "pink",
+      "tags": ["design", "ui", "ux", "accessibility", "responsive", "testing", "playwright"],
+      "mcps": ["playwright"]
     }
   ]
 }

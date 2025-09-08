@@ -13,6 +13,7 @@ coverage
 .aicraft/
 .claude/
 .mcp.json
+.playwright-mcp
 
 # Test files
 test-agents/

@@ -2,27 +2,19 @@
   "mcpServers": {
     "shadcn-components": {
       "command": "npx",
-      "args": [
-        "@anthropic-ai/shadcn-components"
-      ]
+      "args": ["@anthropic-ai/shadcn-components"]
     },
     "shadcn-themes": {
       "command": "npx",
-      "args": [
-        "@anthropic-ai/shadcn-themes"
-      ]
+      "args": ["@anthropic-ai/shadcn-themes"]
     },
     "playwright": {
       "command": "npx",
-      "args": [
-        "@anthropic-ai/mcp-playwright"
-      ]
+      "args": ["@anthropic-ai/mcp-playwright"]
     },
     "neo4j": {
       "command": "npx",
-      "args": [
-        "@anthropic-ai/mcp-neo4j"
-      ],
+      "args": ["@anthropic-ai/mcp-neo4j"],
       "env": {
         "NEO4J_URI": "bolt://localhost:7687",
         "NEO4J_USERNAME": "neo4j",
@@ -31,9 +23,7 @@
     },
     "filesystem": {
       "command": "npx",
-      "args": [
-        "@anthropic-ai/mcp-filesystem"
-      ]
+      "args": ["@anthropic-ai/mcp-filesystem"]
     }
   }
 }

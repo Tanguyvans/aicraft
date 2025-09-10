@@ -5,14 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Modern color palette */
-  --ifm-color-primary: #6366f1;
-  --ifm-color-primary-dark: #5856eb;
-  --ifm-color-primary-darker: #5145e6;
-  --ifm-color-primary-darkest: #3730a3;
-  --ifm-color-primary-light: #7c3aed;
-  --ifm-color-primary-lighter: #8b5cf6;
-  --ifm-color-primary-lightest: #a78bfa;
+  /* AITMPL-inspired color palette */
+  --ifm-color-primary: #10b981;
+  --ifm-color-primary-dark: #059669;
+  --ifm-color-primary-darker: #047857;
+  --ifm-color-primary-darkest: #065f46;
+  --ifm-color-primary-light: #34d399;
+  --ifm-color-primary-lighter: #6ee7b7;
+  --ifm-color-primary-lightest: #a7f3d0;
 
   /* Enhanced typography */
   --ifm-font-family-base:
@@ -34,13 +34,14 @@
   --ifm-color-warning: #f59e0b;
   --ifm-color-danger: #ef4444;
 
-  /* Background gradients */
-  --ifm-hero-background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Terminal-inspired gradients */
+  --ifm-hero-background-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   --ifm-card-background-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
 
   /* Code styling */
-  --docusaurus-highlighted-code-line-bg: rgba(99, 102, 241, 0.1);
-  --ifm-code-background: #f8fafc;
+  --docusaurus-highlighted-code-line-bg: rgba(16, 185, 129, 0.1);
+  --ifm-code-background: #1e293b;
+  --ifm-code-color: #10b981;
 
   /* Border radius for modern look */
   --ifm-button-border-radius: 0.75rem;
@@ -53,26 +54,27 @@
 }
 
 [data-theme='dark'] {
-  /* Dark mode modern colors */
-  --ifm-color-primary: #a78bfa;
-  --ifm-color-primary-dark: #9333ea;
-  --ifm-color-primary-darker: #8b5cf6;
-  --ifm-color-primary-darkest: #7c3aed;
-  --ifm-color-primary-light: #c4b5fd;
-  --ifm-color-primary-lighter: #ddd6fe;
-  --ifm-color-primary-lightest: #ede9fe;
+  /* Dark mode AITMPL colors */
+  --ifm-color-primary: #10b981;
+  --ifm-color-primary-dark: #059669;
+  --ifm-color-primary-darker: #047857;
+  --ifm-color-primary-darkest: #065f46;
+  --ifm-color-primary-light: #34d399;
+  --ifm-color-primary-lighter: #6ee7b7;
+  --ifm-color-primary-lightest: #a7f3d0;
 
   /* Dark background */
   --ifm-background-color: #0f172a;
   --ifm-background-surface-color: #1e293b;
 
-  /* Dark gradients */
-  --ifm-hero-background-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  /* Dark terminal gradients */
+  --ifm-hero-background-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   --ifm-card-background-gradient: linear-gradient(145deg, #1e293b 0%, #334155 100%);
 
   /* Dark code styling */
-  --docusaurus-highlighted-code-line-bg: rgba(167, 139, 250, 0.2);
+  --docusaurus-highlighted-code-line-bg: rgba(16, 185, 129, 0.2);
   --ifm-code-background: #1e293b;
+  --ifm-code-color: #10b981;
 }
 
 /* Modern hero section styling */
@@ -98,10 +100,11 @@
   font-size: 3.5rem !important;
   font-weight: 700 !important;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #10b981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
 }
 
 .hero__subtitle {
@@ -136,8 +139,9 @@
 }
 
 .button--primary {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
 .button--secondary {
@@ -166,23 +170,49 @@
   box-shadow: var(--ifm-box-shadow-md);
 }
 
-/* Enhanced navbar */
+/* Enhanced navbar with terminal aesthetic */
 .navbar {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: var(--ifm-box-shadow-tl);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
 }
 
 [data-theme='dark'] .navbar {
   background: rgba(15, 23, 42, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-/* Code blocks enhancement */
+.navbar__brand {
+  font-weight: 700;
+  color: var(--ifm-color-primary) !important;
+}
+
+.navbar__link {
+  font-weight: 500;
+}
+
+.navbar__link:hover {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* Code blocks enhancement with terminal styling */
 .prism-code {
   border-radius: var(--ifm-code-border-radius);
   box-shadow: var(--ifm-box-shadow-tl);
+  background: #1e293b !important;
+  border: 1px solid #334155;
+}
+
+code {
+  background: var(--ifm-code-background);
+  color: var(--ifm-code-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.375rem;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 0.875rem;
 }
 
 /* Smooth animations */
@@ -200,6 +230,43 @@
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
 }
 
+/* Global terminal aesthetic improvements */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+[data-theme='dark'] body {
+  background: #0f172a;
+}
+
+/* Scrollbar styling for dark theme */
+[data-theme='dark'] ::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Footer styling */
+.footer {
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+[data-theme='dark'] .footer {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-top: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 /* Responsive design improvements */
 @media screen and (max-width: 768px) {
   .hero__title {
@@ -212,5 +279,14 @@
 
   .hero {
     padding: 3rem 0 4rem;
+  }
+
+  .navbar {
+    font-size: 0.9rem;
+  }
+
+  code {
+    font-size: 0.8rem;
+    padding: 0.1rem 0.25rem;
   }
 }

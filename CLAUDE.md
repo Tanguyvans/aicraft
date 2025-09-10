@@ -13,18 +13,16 @@ AI Agent Package Manager for Claude - Install and manage AI agents
 You have access to specialized sub agents:
 
 ### shadcn-ui-expert
-
 - **Usage**: Specialized in building and modifying user interfaces using shadcn/ui components and blocks
 - **MCPs**: shadcn-components, shadcn-themes
 - **Context**: Always pass session context file `.claude/tasks/context_session_x.md`
 - **Follow-up**: Read agent documentation in `.claude/doc/` before implementation
 
 ### design-review
-
-- **Usage**: Conduct comprehensive design reviews on front-end pull requests or UI changes with automated testing
+- **Usage**: Specialized in conducting comprehensive design reviews on front-end pull requests or UI changes with automated testing
 - **MCPs**: playwright
-- **Context**: Requires live preview environment for testing
-- **Follow-up**: Provides categorized feedback (Blockers/High/Medium/Nitpicks)
+- **Context**: Always pass session context file `.claude/tasks/context_session_x.md`
+- **Follow-up**: Read agent documentation in `.claude/doc/` before implementation
 
 ## Quick References
 
@@ -36,37 +34,29 @@ For specific deployment tasks, check these documentation files:
 ## Context Session Management
 
 ### Session File Format
-
 Location: `.claude/tasks/context_session_[id].md`
 
 ```markdown
 # Session [ID]: [Task Name]
 
 ## Overview
-
 Brief description of the main task or project goal.
 
 ## Progress Log
-
 - [Timestamp] [Agent]: [Action taken]
 - [Timestamp] Main: [Implementation completed]
 
 ## Current State
-
 What has been accomplished and what remains.
 
 ## Sub Agent Reports
-
 Links to documentation created by sub agents:
-
 - [Agent]: [.claude/doc/file.md] - [Summary]
 
 ## Next Steps
-
 What should be done next.
 
 ## Context for Future Agents
-
 Key information that other agents need to know.
 ```
 
@@ -98,7 +88,6 @@ npx aicraft init
 
 - **shadcn-ui-expert**: Installed
 - **design-review**: Installed
-
 ## Visual Development & Testing
 
 ### Design System
@@ -215,3 +204,4 @@ When implementing UI features, verify:
 - Design review agent configuration: `/.claude/agents/design-review-agent.md`
 - Design principles checklist: `/context/design-principles.md`
 - Custom slash commands: `/context/design-review-slash-command.md`
+

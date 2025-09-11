@@ -1,18 +1,138 @@
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
-import clsx from 'clsx';
-import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 
-function HomepageHeader() {
+function MainContent() {
   const { siteConfig } = useDocusaurusContext();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showcaseFilter, setShowcaseFilter] = useState('all');
+
+  // Library Documentation (for using AIcraft)
+  const libraryDocs = [
+    { type: 'doc', subtype: 'library', name: 'Getting Started', emoji: '🚀', desc: 'Quick Start', url: '/docs/intro' },
+    { type: 'doc', subtype: 'library', name: 'Installation', emoji: '📦', desc: 'Setup Guide', url: '/docs/install' },
+    { type: 'doc', subtype: 'library', name: 'CLI Reference', emoji: '⌨️', desc: 'Commands', url: '/docs/cli' },
+    { type: 'doc', subtype: 'library', name: 'Configuration', emoji: '⚙️', desc: 'Config', url: '/docs/config' },
+    { type: 'doc', subtype: 'library', name: 'Best Practices', emoji: '✨', desc: 'Guidelines', url: '/docs/best' },
+    { type: 'doc', subtype: 'library', name: 'Troubleshooting', emoji: '🔧', desc: 'Debug Help', url: '/docs/debug' },
+  ];
+
+  // Tools Documentation (for installed agents/MCPs)
+  const toolsDocs = [
+    { type: 'doc', subtype: 'tools', name: 'shadcn-ui-expert', emoji: '🎨', desc: 'UI Component Guide', url: '/docs/agents/shadcn-ui-expert' },
+    { type: 'doc', subtype: 'tools', name: 'design-review', emoji: '🔍', desc: 'Design Testing Guide', url: '/docs/agents/design-review' },
+    { type: 'doc', subtype: 'tools', name: 'neo4j-expert', emoji: '🕸️', desc: 'Graph DB Guide', url: '/docs/agents/neo4j-expert' },
+    { type: 'doc', subtype: 'tools', name: 'playwright', emoji: '🎪', desc: 'Browser Testing MCP', url: '/docs/mcps/playwright' },
+    { type: 'doc', subtype: 'tools', name: 'shadcn-components', emoji: '🎨', desc: 'Components MCP', url: '/docs/mcps/shadcn-components' },
+    { type: 'doc', subtype: 'tools', name: 'github', emoji: '🐙', desc: 'GitHub Integration', url: '/docs/mcps/github' },
+  ];
+
+  const allContent = [
+    // Agents
+    { type: 'agent', name: 'shadcn-ui-expert', description: 'Build beautiful UIs with shadcn/ui', emoji: '🎨' },
+    { type: 'agent', name: 'design-review', description: 'Automated design testing', emoji: '🔍' },
+    { type: 'agent', name: 'neo4j-expert', description: 'Graph database expertise', emoji: '🕸️' },
+    // MCPs
+    { type: 'mcp', name: 'shadcn-components', description: 'shadcn/ui components MCP', emoji: '🎨' },
+    { type: 'mcp', name: 'playwright', description: 'Browser automation MCP', emoji: '🎪' },
+    { type: 'mcp', name: 'ide', description: 'IDE integration MCP', emoji: '💻' },
+    // Library Docs
+    ...libraryDocs.map(doc => ({ ...doc, description: doc.desc })),
+    // Tools Docs  
+    ...toolsDocs.map(doc => ({ ...doc, description: doc.desc })),
+  ];
+
+  const agents = [
+    { type: 'agent', name: 'shadcn-ui-expert', emoji: '🎨', desc: 'UI Components' },
+    { type: 'agent', name: 'design-review', emoji: '🔍', desc: 'Design QA' },
+    { type: 'agent', name: 'neo4j-expert', emoji: '🕸️', desc: 'Graph DB' },
+    { type: 'agent', name: 'react-native', emoji: '📱', desc: 'Mobile Apps' },
+    { type: 'agent', name: 'nextjs-expert', emoji: '⚡', desc: 'Next.js' },
+    { type: 'agent', name: 'api-designer', emoji: '🔌', desc: 'REST APIs' },
+    { type: 'agent', name: 'database-expert', emoji: '💾', desc: 'SQL/NoSQL' },
+    { type: 'agent', name: 'devops-expert', emoji: '🚀', desc: 'CI/CD' },
+    { type: 'agent', name: 'security-audit', emoji: '🔒', desc: 'Security' },
+    { type: 'agent', name: 'performance', emoji: '⚡', desc: 'Optimization' },
+    { type: 'agent', name: 'testing-expert', emoji: '🧪', desc: 'Test Automation' },
+    { type: 'agent', name: 'tailwind-expert', emoji: '🎨', desc: 'Tailwind CSS' },
+  ];
+
+  const mcps = [
+    { type: 'mcp', name: 'playwright', emoji: '🎪', desc: 'Browser Testing' },
+    { type: 'mcp', name: 'shadcn-components', emoji: '🎨', desc: 'UI Library' },
+    { type: 'mcp', name: 'ide', emoji: '💻', desc: 'IDE Integration' },
+    { type: 'mcp', name: 'github', emoji: '🐙', desc: 'GitHub API' },
+    { type: 'mcp', name: 'docker', emoji: '🐳', desc: 'Containers' },
+    { type: 'mcp', name: 'aws', emoji: '☁️', desc: 'AWS Services' },
+    { type: 'mcp', name: 'firebase', emoji: '🔥', desc: 'Firebase' },
+    { type: 'mcp', name: 'stripe', emoji: '💳', desc: 'Payments' },
+    { type: 'mcp', name: 'slack', emoji: '💬', desc: 'Slack API' },
+    { type: 'mcp', name: 'notion', emoji: '📝', desc: 'Notion API' },
+    { type: 'mcp', name: 'vercel', emoji: '▲', desc: 'Deployment' },
+    { type: 'mcp', name: 'supabase', emoji: '⚡', desc: 'Backend' },
+  ];
+
+
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    if (value || activeFilter !== 'all') {
+      let filtered = allContent;
+      
+      // Filter by type
+      if (activeFilter !== 'all') {
+        filtered = filtered.filter(item => item.type === activeFilter);
+      }
+      
+      // Filter by search term
+      if (value) {
+        filtered = filtered.filter(item =>
+          item.name.toLowerCase().includes(value.toLowerCase()) ||
+          item.description.toLowerCase().includes(value.toLowerCase())
+        );
+      }
+      
+      setSearchResults(filtered.slice(0, 6));
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    setShowcaseFilter(filter); // Also filter the showcase
+    handleSearch(searchTerm);
+  };
+
+  const handleItemClick = (item: any) => {
+    setSelectedItem(item);
+    // Copy command to clipboard
+    let command = '';
+    if (item.type === 'agent') {
+      command = `npx aicraft install ${item.name}`;
+    } else if (item.type === 'mcp') {
+      command = `npx aicraft add-mcp ${item.name}`;
+    } else if (item.type === 'doc' && item.url) {
+      window.location.href = item.url;
+      return;
+    }
+    
+    if (command) {
+      navigator.clipboard.writeText(command);
+    }
+  };
+
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className={styles.heroContent}>
+    <div className={styles.mainContainer}>
+      {/* Hero Section */}
+      <section className={styles.heroSection}>
         <div className={styles.asciiArt}>
           <pre>{`
  █████╗ ██╗ ██████╗██████╗  █████╗ ███████╗████████╗
@@ -23,499 +143,262 @@ function HomepageHeader() {
 ╚═╝  ╚═╝╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
           `}</pre>
         </div>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className={styles.tagline}>{siteConfig.tagline}</p>
 
-        {/* Metadata badges */}
-        <div className={styles.metadataBadges}>
-          <a href="https://www.npmjs.com/package/aicraft" className={styles.badge}>
-            <img src="https://img.shields.io/npm/v/aicraft?style=flat-square&color=6366f1" alt="npm version" />
-          </a>
-          <a href="https://www.npmjs.com/package/aicraft" className={styles.badge}>
-            <img src="https://img.shields.io/npm/dm/aicraft?style=flat-square&color=10b981" alt="downloads" />
-          </a>
-          <a href="https://github.com/Tanguyvans/aicraft" className={styles.badge}>
-            <img src="https://img.shields.io/github/stars/Tanguyvans/aicraft?style=flat-square&color=8b5cf6" alt="stars" />
-          </a>
-          <a href="https://github.com/Tanguyvans/aicraft/blob/main/LICENSE" className={styles.badge}>
-            <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license" />
-          </a>
-        </div>
-
-        <div className={styles.buttons}>
-          <Link
-            className={clsx('button button--primary button--lg', styles.primaryButton)}
-            to="/docs/intro"
-          >
-            📚 Documentation
-          </Link>
-          <Link
-            className={clsx('button button--secondary button--lg', styles.secondaryButton)}
-            href="https://www.npmjs.com/package/aicraft"
-          >
-            📦 Install
-          </Link>
-        </div>
-
-        {/* Quick install */}
-        <div className={styles.quickInstall}>
-          <div className={styles.installPrompt}>
-            <span className={styles.promptSymbol}>❯</span>
-            <code>npm install -g aicraft</code>
-            <button className={styles.copyButton} onClick={() => navigator.clipboard.writeText('npm install -g aicraft')}>📋</button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-
-function AgentBrowser({ searchTerm, setSearchTerm, activeCategory, setActiveCategory }) {
-  const categories = [
-    { emoji: '🤖', name: 'agents' },
-    { emoji: '⚡', name: 'commands' },
-    { emoji: '🔌', name: 'mcps' },
-    { emoji: '📚', name: 'docs' }
-  ];
-
-  return (
-    <section className={styles.browserSection}>
-      <div className="container">
-        <div className={styles.searchContainer}>
-          <div className={styles.searchBox}>
-            <span className={styles.searchPrompt}>&gt;</span>
-            <input
-              type="text"
-              placeholder="Find agents, commands, and tools..."
-              className={styles.searchInput}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className={styles.searchButton} onClick={() => setSearchTerm('')}>🔍</button>
-          </div>
-        </div>
-
-        <div className={styles.categoryGrid}>
-          {categories.map((category, idx) => (
-            <button
-              key={idx}
-              className={clsx(styles.categoryButton, {
-                [styles.activeCategory]: activeCategory === category.name
-              })}
-              onClick={() => setActiveCategory(activeCategory === category.name ? 'all' : category.name)}
-            >
-              <span className={styles.categoryEmoji}>{category.emoji}</span>
-              <span className={styles.categoryName}>{category.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TerminalCommands() {
-  const [currentCommandIndex, setCurrentCommandIndex] = useState(0);
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-
-  const commands = [
-    {
-      command: 'npm install -g aicraft',
-      description: 'Install AICraft globally',
-      output: '✅ AICraft installed successfully',
-    },
-    {
-      command: 'npx aicraft list',
-      description: 'View available agents',
-      output: 'Available agents:\n  • shadcn-ui-expert\n  • design-review',
-    },
-    {
-      command: 'npx aicraft install shadcn-ui-expert',
-      description: 'Install shadcn/ui expert agent',
-      output: '✅ shadcn-ui-expert installed',
-    },
-    {
-      command: 'npx aicraft create my-agent',
-      description: 'Create custom agent',
-      output: '🎯 Creating new agent scaffold...',
-    },
-    {
-      command: 'npx aicraft init',
-      description: 'Initialize Claude workflow',
-      output: '🚀 Workspace initialized with Claude integration',
-    },
-  ];
-
-  useEffect(() => {
-    if (!isTyping) return;
-
-    const currentCommand = commands[currentCommandIndex];
-    const fullText = currentCommand.command;
-
-    if (displayedText.length < fullText.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(fullText.slice(0, displayedText.length + 1));
-      }, 100);
-      return () => clearTimeout(timeout);
-    } else {
-      const timeout = setTimeout(() => {
-        setCurrentCommandIndex((prev) => (prev + 1) % commands.length);
-        setDisplayedText('');
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [displayedText, currentCommandIndex, isTyping, commands]);
-
-  return (
-    <section className={styles.terminalSection}>
-      <div className="container">
-        <div className="text--center">
-          <Heading as="h2" className={styles.sectionTitle}>
-            Get Started in Seconds
-          </Heading>
-          <p className={styles.sectionSubtitle}>
-            Install and manage AI agents with simple CLI commands
-          </p>
-        </div>
-
-        <div className={styles.terminalWrapper}>
+        {/* Terminal Install Section */}
+        <div className={styles.terminalInstall}>
           <div className={styles.terminalHeader}>
             <div className={styles.terminalButtons}>
               <span className={styles.terminalButton} style={{ backgroundColor: '#ff5f57' }}></span>
               <span className={styles.terminalButton} style={{ backgroundColor: '#ffbd2e' }}></span>
               <span className={styles.terminalButton} style={{ backgroundColor: '#28ca42' }}></span>
             </div>
-            <div className={styles.terminalTitle}>terminal — aicraft</div>
+            <div className={styles.terminalTitle}>quick install</div>
           </div>
-          <div className={styles.terminalContent}>
+          <div className={styles.terminalBody}>
             <div className={styles.terminalLine}>
-              <span className={styles.terminalPrompt}>❯</span>
-              <span className={styles.terminalCommand}>
-                {displayedText}
-                <span className={styles.cursor}>|</span>
-              </span>
+              <span className={styles.prompt}>$</span>
+              <span className={styles.command}>npm install -g aicraft</span>
+              <button
+                className={styles.copyBtn}
+                onClick={() => navigator.clipboard.writeText('npm install -g aicraft')}
+                title="Copy command"
+              >
+                📋
+              </button>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {displayedText === commands[currentCommandIndex]?.command && (
-              <div className={styles.terminalOutput}>
-                {commands[currentCommandIndex].output.split('\n').map((line, idx) => (
-                  <div key={idx} className={styles.terminalOutputLine}>
-                    {line}
+      {/* Search Section with Filters */}
+      <section className={styles.searchSection}>
+        <div className={styles.filterButtons}>
+          <button
+            className={`${styles.filterBtn} ${activeFilter === 'all' ? styles.active : ''}`}
+            onClick={() => handleFilterChange('all')}
+          >
+            🌟 All
+          </button>
+          <button
+            className={`${styles.filterBtn} ${activeFilter === 'agent' ? styles.active : ''}`}
+            onClick={() => handleFilterChange('agent')}
+          >
+            🤖 Agents
+          </button>
+          <button
+            className={`${styles.filterBtn} ${activeFilter === 'mcp' ? styles.active : ''}`}
+            onClick={() => handleFilterChange('mcp')}
+          >
+            🔌 MCPs
+          </button>
+          <button
+            className={`${styles.filterBtn} ${activeFilter === 'doc' ? styles.active : ''}`}
+            onClick={() => handleFilterChange('doc')}
+          >
+            📚 Docs
+          </button>
+        </div>
+
+        <div className={styles.searchWrapper}>
+          <div className={styles.searchContainer}>
+            <span className={styles.searchIcon}>🔍</span>
+            <input
+              type="text"
+              placeholder="Search agents, MCPs, and docs..."
+              className={styles.searchInput}
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 300)}
+            />
+          </div>
+
+          {searchResults.length > 0 && searchFocused && (
+            <div className={styles.searchDropdown}>
+              {searchResults.map((result, idx) => (
+                <div
+                  key={idx}
+                  className={styles.searchResult}
+                  onClick={() => {
+                    if (result.url) {
+                      window.location.href = result.url;
+                    } else if (result.type === 'agent') {
+                      navigator.clipboard.writeText(`npx aicraft install ${result.name}`);
+                    }
+                  }}
+                >
+                  <span className={styles.resultEmoji}>{result.emoji}</span>
+                  <div className={styles.resultInfo}>
+                    <span className={styles.resultName}>{result.name}</span>
+                    <span className={styles.resultDesc}>{result.description}</span>
+                  </div>
+                  <span
+                    className={styles.resultType}
+                    data-type={result.type}
+                  >
+                    {result.type}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Dynamic Showcase Grid */}
+      <section className={styles.showcaseSection}>
+        {/* Command Modal */}
+        {selectedItem && (
+          <div className={styles.commandModal} onClick={() => setSelectedItem(null)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <span className={styles.modalEmoji}>{selectedItem.emoji}</span>
+                <h3>{selectedItem.name}</h3>
+                <button className={styles.closeBtn} onClick={() => setSelectedItem(null)}>✕</button>
+              </div>
+              <div className={styles.modalBody}>
+                <p className={styles.modalDesc}>{selectedItem.desc}</p>
+                <div className={styles.commandBox}>
+                  <span className={styles.prompt}>$</span>
+                  <code className={styles.commandText}>
+                    {selectedItem.type === 'agent' 
+                      ? `npx aicraft install ${selectedItem.name}`
+                      : `npx aicraft add-mcp ${selectedItem.name}`}
+                  </code>
+                  <button 
+                    className={styles.copyBtnModal}
+                    onClick={() => {
+                      const cmd = selectedItem.type === 'agent' 
+                        ? `npx aicraft install ${selectedItem.name}`
+                        : `npx aicraft add-mcp ${selectedItem.name}`;
+                      navigator.clipboard.writeText(cmd);
+                    }}
+                  >
+                    📋
+                  </button>
+                </div>
+                <p className={styles.copiedNote}>✅ Command copied to clipboard!</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={styles.showcaseGrid}>
+          {/* Column 1 - Agents */}
+          {(showcaseFilter === 'all' || showcaseFilter === 'agent') && (
+            <div className={styles.showcaseColumn}>
+              <h3 className={styles.columnTitle}>🤖 Agents</h3>
+              <div className={styles.scrollContent}>
+                {agents.map((item, idx) => (
+                  <div 
+                    key={`agent-${idx}`}
+                    className={styles.showcaseItem}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <span className={styles.itemEmoji}>{item.emoji}</span>
+                    <div className={styles.itemInfo}>
+                      <div className={styles.itemName}>{item.name}</div>
+                      <div className={styles.itemDesc}>{item.desc}</div>
+                    </div>
+                    <span className={styles.itemType} data-type={item.type}>
+                      agent
+                    </span>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.commandGrid}>
-          {commands.map((cmd, idx) => (
-            <div
-              key={idx}
-              className={clsx(styles.commandCard, {
-                [styles.active]: idx === currentCommandIndex,
-              })}
-              onClick={() => {
-                setCurrentCommandIndex(idx);
-                setDisplayedText('');
-                setIsTyping(true);
-              }}
-            >
-              <div className={styles.commandCardHeader}>
-                <code className={styles.commandCardCommand}>{cmd.command}</code>
-              </div>
-              <p className={styles.commandCardDescription}>{cmd.description}</p>
             </div>
-          ))}
+          )}
+
+          {/* Column 2 - MCPs */}
+          {(showcaseFilter === 'all' || showcaseFilter === 'mcp') && (
+            <div className={styles.showcaseColumn}>
+              <h3 className={styles.columnTitle}>🔌 MCPs</h3>
+              <div className={`${styles.scrollContent} ${styles.scrollReverse}`}>
+                {mcps.map((item, idx) => (
+                  <div 
+                    key={`mcp-${idx}`}
+                    className={styles.showcaseItem}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <span className={styles.itemEmoji}>{item.emoji}</span>
+                    <div className={styles.itemInfo}>
+                      <div className={styles.itemName}>{item.name}</div>
+                      <div className={styles.itemDesc}>{item.desc}</div>
+                    </div>
+                    <span className={styles.itemType} data-type={item.type}>
+                      mcp
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Column 3 - Docs */}
+          {(showcaseFilter === 'all' || showcaseFilter === 'doc') && (
+            <div className={styles.showcaseColumn}>
+              <h3 className={styles.columnTitle}>📚 Docs</h3>
+              <div className={styles.scrollContent}>
+                {/* Library Documentation Section */}
+                <div className={styles.docSection}>
+                  <h4 className={styles.docSectionTitle}>📖 Library</h4>
+                  {libraryDocs.map((item, idx) => (
+                    <div 
+                      key={`library-doc-${idx}`}
+                      className={styles.showcaseItem}
+                      onClick={() => handleItemClick(item)}
+                    >
+                      <span className={styles.itemEmoji}>{item.emoji}</span>
+                      <div className={styles.itemInfo}>
+                        <div className={styles.itemName}>{item.name}</div>
+                        <div className={styles.itemDesc}>{item.desc}</div>
+                      </div>
+                      <span className={styles.itemType} data-type="library">
+                        lib
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tools Documentation Section */}
+                <div className={styles.docSection}>
+                  <h4 className={styles.docSectionTitle}>🛠️ Tools</h4>
+                  {toolsDocs.map((item, idx) => (
+                    <div 
+                      key={`tools-doc-${idx}`}
+                      className={styles.showcaseItem}
+                      onClick={() => handleItemClick(item)}
+                    >
+                      <span className={styles.itemEmoji}>{item.emoji}</span>
+                      <div className={styles.itemInfo}>
+                        <div className={styles.itemName}>{item.name}</div>
+                        <div className={styles.itemDesc}>{item.desc}</div>
+                      </div>
+                      <span className={styles.itemType} data-type="tools">
+                        tool
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
-
-function BrowseContent({ searchTerm, activeCategory }) {
-  const agents = [
-    {
-      name: 'shadcn-ui-expert',
-      description: 'Build beautiful UIs with shadcn/ui components and blocks',
-      icon: '🎨',
-      tags: ['React', 'UI/UX', 'Components'],
-      category: 'agents',
-    },
-    {
-      name: 'design-review',
-      description: 'Comprehensive design reviews with automated testing',
-      icon: '🔍',
-      tags: ['Design', 'Testing', 'Playwright'],
-      category: 'agents',
-    },
-  ];
-
-  const commands = [
-    { name: 'npx aicraft list', description: 'List all available agents', icon: '📋' },
-    { name: 'npx aicraft install [name]', description: 'Install a specific agent', icon: '📦' },
-    { name: 'npx aicraft create [name]', description: 'Create a new agent', icon: '✨' },
-    { name: 'npx aicraft init', description: 'Initialize Claude workflow', icon: '🚀' },
-  ];
-
-  const mcps = [
-    { name: 'shadcn-components', description: 'shadcn/ui components and blocks MCP', icon: '🎨' },
-    { name: 'shadcn-themes', description: 'Theme management for shadcn projects', icon: '🎭' },
-    { name: 'playwright', description: 'Browser automation and testing MCP', icon: '🎪' },
-  ];
-
-  const docs = [
-    { name: 'Getting Started', description: 'Quick start guide for aicraft', icon: '🚀', url: '/docs/intro' },
-    { name: 'Available Agents', description: 'Browse all available agents', icon: '🤖', url: '/docs/agents' },
-    { name: 'CLI Commands', description: 'Complete command reference', icon: '⚡', url: '/docs/commands' },
-    { name: 'Creating Agents', description: 'Build your own custom agents', icon: '🛠️', url: '/docs/create' },
-  ];
-
-  const renderAgents = () => {
-    const filteredAgents = agents.filter(agent => 
-      (searchTerm === '' ||
-      agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-      (activeCategory === 'all' || activeCategory === 'agents' || activeCategory === agent.category)
-    );
-
-    return (
-      <div className={styles.agentGrid}>
-        {filteredAgents.map((agent, idx) => (
-          <div key={idx} className={styles.agentCard}>
-            <div className={styles.agentHeader}>
-              <div className={styles.agentIcon}>{agent.icon}</div>
-            </div>
-            <h3 className={styles.agentName}>{agent.name}</h3>
-            <p className={styles.agentDescription}>{agent.description}</p>
-            <div className={styles.agentTags}>
-              {agent.tags.map((tag, tagIdx) => (
-                <span key={tagIdx} className={styles.agentTag}>{tag}</span>
-              ))}
-            </div>
-            <div className={styles.agentActions}>
-              <div className={styles.installCommand}>
-                <span className={styles.promptSymbol}>$</span>
-                <code>npx aicraft install {agent.name}</code>
-                <button
-                  className={styles.copyButton}
-                  onClick={() => navigator.clipboard.writeText(`npx aicraft install ${agent.name}`)}
-                >
-                  📋
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderCommands = () => {
-    const filteredCommands = commands.filter(cmd => 
-      (searchTerm === '' ||
-      cmd.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cmd.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (activeCategory === 'all' || activeCategory === 'commands')
-    );
-
-    return (
-      <div className={styles.agentGrid}>
-        {filteredCommands.map((cmd, idx) => (
-          <div key={idx} className={styles.agentCard}>
-            <div className={styles.agentHeader}>
-              <div className={styles.agentIcon}>{cmd.icon}</div>
-            </div>
-            <h3 className={styles.agentName}>{cmd.name}</h3>
-            <p className={styles.agentDescription}>{cmd.description}</p>
-            <div className={styles.agentActions}>
-              <div className={styles.installCommand}>
-                <span className={styles.promptSymbol}>$</span>
-                <code>{cmd.name}</code>
-                <button
-                  className={styles.copyButton}
-                  onClick={() => navigator.clipboard.writeText(cmd.name)}
-                >
-                  📋
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderMCPs = () => {
-    const filteredMCPs = mcps.filter(mcp => 
-      (searchTerm === '' ||
-      mcp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mcp.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (activeCategory === 'all' || activeCategory === 'mcps')
-    );
-
-    return (
-      <div className={styles.agentGrid}>
-        {filteredMCPs.map((mcp, idx) => (
-          <div key={idx} className={styles.agentCard}>
-            <div className={styles.agentHeader}>
-              <div className={styles.agentIcon}>{mcp.icon}</div>
-            </div>
-            <h3 className={styles.agentName}>{mcp.name}</h3>
-            <p className={styles.agentDescription}>{mcp.description}</p>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderDocs = () => {
-    const filteredDocs = docs.filter(doc => 
-      (searchTerm === '' ||
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (activeCategory === 'all' || activeCategory === 'docs')
-    );
-
-    return (
-      <div className={styles.agentGrid}>
-        {filteredDocs.map((doc, idx) => (
-          <div key={idx} className={styles.agentCard}>
-            <div className={styles.agentHeader}>
-              <div className={styles.agentIcon}>{doc.icon}</div>
-            </div>
-            <h3 className={styles.agentName}>{doc.name}</h3>
-            <p className={styles.agentDescription}>{doc.description}</p>
-            <div className={styles.agentActions}>
-              <Link 
-                to={doc.url} 
-                className={`button button--primary ${styles.docButton}`}
-              >
-                View Documentation
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const getCategoryTitle = () => {
-    const baseTitle = (() => {
-      switch(activeCategory) {
-        case 'agents': return 'Available Agents';
-        case 'commands': return 'CLI Commands'; 
-        case 'mcps': return 'MCP Servers';
-        case 'docs': return 'Documentation';
-        default: return 'Explore AICraft';
-      }
-    })();
-
-    if (searchTerm) {
-      return `${baseTitle} - "${searchTerm}"`;
-    }
-    return baseTitle;
-  };
-
-  const getCategorySubtitle = () => {
-    const getResultCount = () => {
-      if (activeCategory === 'agents') {
-        const filteredCount = agents.filter(agent => 
-          (searchTerm === '' ||
-          agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          agent.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-          (activeCategory === 'all' || activeCategory === 'agents' || activeCategory === agent.category)
-        ).length;
-        return searchTerm ? ` (${filteredCount} found)` : '';
-      }
-      return '';
-    };
-
-    const baseSubtitle = (() => {
-      switch(activeCategory) {
-        case 'agents': return 'Pre-configured experts for specific domains and technologies';
-        case 'commands': return 'Command-line interface for managing agents';
-        case 'mcps': return 'Model Context Protocol servers available'; 
-        case 'docs': return 'Documentation and guides for AICraft';
-        default: return 'Search and discover agents, commands, and resources';
-      }
-    })();
-
-    return baseSubtitle + getResultCount();
-  };
-
-  const renderContent = () => {
-    switch(activeCategory) {
-      case 'agents': return renderAgents();
-      case 'commands': return renderCommands();
-      case 'mcps': return renderMCPs();
-      case 'docs': return renderDocs();
-      default: return (
-        <div className={styles.allContent}>
-          {renderAgents()}
-          <div style={{marginTop: '3rem'}}>
-            <h3 style={{textAlign: 'center', marginBottom: '2rem', color: 'var(--ifm-color-emphasis-800)'}}>CLI Commands</h3>
-            {renderCommands()}
-          </div>
-          <div style={{marginTop: '3rem'}}>
-            <h3 style={{textAlign: 'center', marginBottom: '2rem', color: 'var(--ifm-color-emphasis-800)'}}>MCP Servers</h3>
-            {renderMCPs()}
-          </div>
-          <div style={{marginTop: '3rem'}}>
-            <h3 style={{textAlign: 'center', marginBottom: '2rem', color: 'var(--ifm-color-emphasis-800)'}}>Documentation</h3>
-            {renderDocs()}
-          </div>
-        </div>
-      );
-    }
-  };
-
-  return (
-    <section className={styles.agentSection}>
-      <div className="container">
-        <div className="text--center">
-          <Heading as="h2" className={styles.sectionTitle}>
-            {getCategoryTitle()}
-          </Heading>
-          <p className={styles.sectionSubtitle}>
-            {getCategorySubtitle()}
-          </p>
-        </div>
-
-        {renderContent()}
-      </div>
-    </section>
-  );
-}
-
 
 export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
 
   return (
     <Layout
       title={`${siteConfig.title} - AI Agent Package Manager`}
       description="Install and manage specialized AI agents for Claude Code. Supercharge your development workflow with pre-configured experts."
     >
-      <HomepageHeader />
-      <main>
-        <AgentBrowser
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-        />
-        <BrowseContent
-          searchTerm={searchTerm}
-          activeCategory={activeCategory}
-        />
-        <TerminalCommands />
-      </main>
+      <MainContent />
     </Layout>
   );
 }

@@ -294,6 +294,18 @@
   background: #3b82f6;
 }
 
+.resultType[data-type="agent-doc"] {
+  background: #10b981;
+}
+
+.resultType[data-type="mcp-doc"] {
+  background: #8b5cf6;
+}
+
+.resultType[data-type="install-doc"] {
+  background: #f59e0b;
+}
+
 /* Showcase Grid Section */
 .showcaseSection {
   padding: 3rem 0;
@@ -326,6 +338,10 @@
   text-align: center;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid rgba(16, 185, 129, 0.3);
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding-top: 0.5rem;
 }
 
 .scrollContent {
@@ -333,6 +349,8 @@
   flex-direction: column;
   gap: 0.75rem;
   animation: scrollUp 60s linear infinite;
+  position: relative;
+  z-index: 1;
 }
 
 .scrollContent:hover {
@@ -443,6 +461,18 @@
 }
 
 .itemType[data-type="tools"] {
+  background: #f59e0b;
+}
+
+.itemType[data-type="agent-doc"] {
+  background: #10b981;
+}
+
+.itemType[data-type="mcp-doc"] {
+  background: #8b5cf6;
+}
+
+.itemType[data-type="install-doc"] {
   background: #f59e0b;
 }
 

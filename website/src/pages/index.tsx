@@ -14,24 +14,10 @@ function MainContent() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showcaseFilter, setShowcaseFilter] = useState('all');
 
-  // Library Documentation (for using AIcraft)
-  const libraryDocs = [
-    { type: 'doc', subtype: 'library', name: 'Getting Started', emoji: '🚀', desc: 'Quick Start', url: '/docs/intro' },
-    { type: 'doc', subtype: 'library', name: 'Installation', emoji: '📦', desc: 'Setup Guide', url: '/docs/install' },
-    { type: 'doc', subtype: 'library', name: 'CLI Reference', emoji: '⌨️', desc: 'Commands', url: '/docs/cli' },
-    { type: 'doc', subtype: 'library', name: 'Configuration', emoji: '⚙️', desc: 'Config', url: '/docs/config' },
-    { type: 'doc', subtype: 'library', name: 'Best Practices', emoji: '✨', desc: 'Guidelines', url: '/docs/best' },
-    { type: 'doc', subtype: 'library', name: 'Troubleshooting', emoji: '🔧', desc: 'Debug Help', url: '/docs/debug' },
-  ];
-
-  // Tools Documentation (for installed agents/MCPs)
-  const toolsDocs = [
-    { type: 'doc', subtype: 'tools', name: 'shadcn-ui-expert', emoji: '🎨', desc: 'UI Component Guide', url: '/docs/agents/shadcn-ui-expert' },
-    { type: 'doc', subtype: 'tools', name: 'design-review', emoji: '🔍', desc: 'Design Testing Guide', url: '/docs/agents/design-review' },
-    { type: 'doc', subtype: 'tools', name: 'neo4j-expert', emoji: '🕸️', desc: 'Graph DB Guide', url: '/docs/agents/neo4j-expert' },
-    { type: 'doc', subtype: 'tools', name: 'playwright', emoji: '🎪', desc: 'Browser Testing MCP', url: '/docs/mcps/playwright' },
-    { type: 'doc', subtype: 'tools', name: 'shadcn-components', emoji: '🎨', desc: 'Components MCP', url: '/docs/mcps/shadcn-components' },
-    { type: 'doc', subtype: 'tools', name: 'github', emoji: '🐙', desc: 'GitHub Integration', url: '/docs/mcps/github' },
+  // Installation Documentation (from /docs/ directory)
+  const docs = [
+    { type: 'doc', subtype: 'install-doc', name: 'docusaurus-setup', emoji: '📖', desc: 'Docusaurus Setup Guide', file: 'docs/docusaurus-setup.md' },
+    { type: 'doc', subtype: 'install-doc', name: 'vastai-deployment', emoji: '🚀', desc: 'Vast.AI Deployment Guide', file: 'docs/vastai-deployment.md' },
   ];
 
   const allContent = [
@@ -43,10 +29,8 @@ function MainContent() {
     { type: 'mcp', name: 'shadcn-components', description: 'shadcn/ui components MCP', emoji: '🎨' },
     { type: 'mcp', name: 'playwright', description: 'Browser automation MCP', emoji: '🎪' },
     { type: 'mcp', name: 'ide', description: 'IDE integration MCP', emoji: '💻' },
-    // Library Docs
-    ...libraryDocs.map(doc => ({ ...doc, description: doc.desc })),
-    // Tools Docs  
-    ...toolsDocs.map(doc => ({ ...doc, description: doc.desc })),
+    // Documentation
+    ...docs.map(doc => ({ ...doc, description: doc.desc })),
   ];
 
   const agents = [
@@ -119,9 +103,8 @@ function MainContent() {
       command = `npx aicraft install ${item.name}`;
     } else if (item.type === 'mcp') {
       command = `npx aicraft add-mcp ${item.name}`;
-    } else if (item.type === 'doc' && item.url) {
-      window.location.href = item.url;
-      return;
+    } else if (item.type === 'doc' && item.subtype === 'install-doc') {
+      command = `npx aicraft docs ${item.name}`;
     }
     
     if (command) {
@@ -264,15 +247,24 @@ function MainContent() {
                   <code className={styles.commandText}>
                     {selectedItem.type === 'agent' 
                       ? `npx aicraft install ${selectedItem.name}`
-                      : `npx aicraft add-mcp ${selectedItem.name}`}
+                      : selectedItem.type === 'mcp'
+                      ? `npx aicraft add-mcp ${selectedItem.name}`
+                      : selectedItem.subtype === 'install-doc'
+                      ? `npx aicraft docs ${selectedItem.name}`
+                      : `# Navigate to ${selectedItem.name} documentation`}
                   </code>
                   <button 
                     className={styles.copyBtnModal}
                     onClick={() => {
-                      const cmd = selectedItem.type === 'agent' 
-                        ? `npx aicraft install ${selectedItem.name}`
-                        : `npx aicraft add-mcp ${selectedItem.name}`;
-                      navigator.clipboard.writeText(cmd);
+                      let cmd = '';
+                      if (selectedItem.type === 'agent') {
+                        cmd = `npx aicraft install ${selectedItem.name}`;
+                      } else if (selectedItem.type === 'mcp') {
+                        cmd = `npx aicraft add-mcp ${selectedItem.name}`;
+                      } else if (selectedItem.subtype === 'install-doc') {
+                        cmd = `npx aicraft docs ${selectedItem.name}`;
+                      }
+                      if (cmd) navigator.clipboard.writeText(cmd);
                     }}
                   >
                     📋
@@ -340,47 +332,22 @@ function MainContent() {
             <div className={styles.showcaseColumn}>
               <h3 className={styles.columnTitle}>📚 Docs</h3>
               <div className={styles.scrollContent}>
-                {/* Library Documentation Section */}
-                <div className={styles.docSection}>
-                  <h4 className={styles.docSectionTitle}>📖 Library</h4>
-                  {libraryDocs.map((item, idx) => (
-                    <div 
-                      key={`library-doc-${idx}`}
-                      className={styles.showcaseItem}
-                      onClick={() => handleItemClick(item)}
-                    >
-                      <span className={styles.itemEmoji}>{item.emoji}</span>
-                      <div className={styles.itemInfo}>
-                        <div className={styles.itemName}>{item.name}</div>
-                        <div className={styles.itemDesc}>{item.desc}</div>
-                      </div>
-                      <span className={styles.itemType} data-type="library">
-                        lib
-                      </span>
+                {docs.map((item, idx) => (
+                  <div 
+                    key={`doc-${idx}`}
+                    className={styles.showcaseItem}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <span className={styles.itemEmoji}>{item.emoji}</span>
+                    <div className={styles.itemInfo}>
+                      <div className={styles.itemName}>{item.name}</div>
+                      <div className={styles.itemDesc}>{item.desc}</div>
                     </div>
-                  ))}
-                </div>
-
-                {/* Tools Documentation Section */}
-                <div className={styles.docSection}>
-                  <h4 className={styles.docSectionTitle}>🛠️ Tools</h4>
-                  {toolsDocs.map((item, idx) => (
-                    <div 
-                      key={`tools-doc-${idx}`}
-                      className={styles.showcaseItem}
-                      onClick={() => handleItemClick(item)}
-                    >
-                      <span className={styles.itemEmoji}>{item.emoji}</span>
-                      <div className={styles.itemInfo}>
-                        <div className={styles.itemName}>{item.name}</div>
-                        <div className={styles.itemDesc}>{item.desc}</div>
-                      </div>
-                      <span className={styles.itemType} data-type="tools">
-                        tool
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    <span className={styles.itemType} data-type="doc">
+                      doc
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

@@ -21,14 +21,20 @@ function MainContent() {
   ];
 
   const allContent = [
-    // Agents
+    // Agents (from actual registry)
     { type: 'agent', name: 'shadcn-ui-expert', description: 'Build beautiful UIs with shadcn/ui', emoji: '🎨' },
     { type: 'agent', name: 'design-review', description: 'Automated design testing', emoji: '🔍' },
     { type: 'agent', name: 'neo4j-expert', description: 'Graph database expertise', emoji: '🕸️' },
-    // MCPs
+    { type: 'agent', name: 'api-designer', description: 'REST and GraphQL API design', emoji: '🔌' },
+    { type: 'agent', name: 'docker-expert', description: 'Container orchestration', emoji: '🐳' },
+    { type: 'agent', name: 'react-architect', description: 'React and Next.js patterns', emoji: '⚛️' },
+    // MCPs (from actual registry)
     { type: 'mcp', name: 'shadcn-components', description: 'shadcn/ui components MCP', emoji: '🎨' },
+    { type: 'mcp', name: 'shadcn-themes', description: 'shadcn/ui themes MCP', emoji: '🎭' },
     { type: 'mcp', name: 'playwright', description: 'Browser automation MCP', emoji: '🎪' },
-    { type: 'mcp', name: 'ide', description: 'IDE integration MCP', emoji: '💻' },
+    { type: 'mcp', name: 'neo4j-database', description: 'Neo4j database MCP', emoji: '🗄️' },
+    { type: 'mcp', name: 'filesystem', description: 'File system operations MCP', emoji: '📁' },
+    { type: 'mcp', name: 'elevenlabs', description: 'Text-to-speech AI MCP', emoji: '🎤' },
     // Documentation
     ...docs.map(doc => ({ ...doc, description: doc.desc })),
   ];
@@ -37,30 +43,18 @@ function MainContent() {
     { type: 'agent', name: 'shadcn-ui-expert', emoji: '🎨', desc: 'UI Components' },
     { type: 'agent', name: 'design-review', emoji: '🔍', desc: 'Design QA' },
     { type: 'agent', name: 'neo4j-expert', emoji: '🕸️', desc: 'Graph DB' },
-    { type: 'agent', name: 'react-native', emoji: '📱', desc: 'Mobile Apps' },
-    { type: 'agent', name: 'nextjs-expert', emoji: '⚡', desc: 'Next.js' },
     { type: 'agent', name: 'api-designer', emoji: '🔌', desc: 'REST APIs' },
-    { type: 'agent', name: 'database-expert', emoji: '💾', desc: 'SQL/NoSQL' },
-    { type: 'agent', name: 'devops-expert', emoji: '🚀', desc: 'CI/CD' },
-    { type: 'agent', name: 'security-audit', emoji: '🔒', desc: 'Security' },
-    { type: 'agent', name: 'performance', emoji: '⚡', desc: 'Optimization' },
-    { type: 'agent', name: 'testing-expert', emoji: '🧪', desc: 'Test Automation' },
-    { type: 'agent', name: 'tailwind-expert', emoji: '🎨', desc: 'Tailwind CSS' },
+    { type: 'agent', name: 'docker-expert', emoji: '🐳', desc: 'Containers' },
+    { type: 'agent', name: 'react-architect', emoji: '⚛️', desc: 'React/Next.js' },
   ];
 
   const mcps = [
-    { type: 'mcp', name: 'playwright', emoji: '🎪', desc: 'Browser Testing' },
     { type: 'mcp', name: 'shadcn-components', emoji: '🎨', desc: 'UI Library' },
-    { type: 'mcp', name: 'ide', emoji: '💻', desc: 'IDE Integration' },
-    { type: 'mcp', name: 'github', emoji: '🐙', desc: 'GitHub API' },
-    { type: 'mcp', name: 'docker', emoji: '🐳', desc: 'Containers' },
-    { type: 'mcp', name: 'aws', emoji: '☁️', desc: 'AWS Services' },
-    { type: 'mcp', name: 'firebase', emoji: '🔥', desc: 'Firebase' },
-    { type: 'mcp', name: 'stripe', emoji: '💳', desc: 'Payments' },
-    { type: 'mcp', name: 'slack', emoji: '💬', desc: 'Slack API' },
-    { type: 'mcp', name: 'notion', emoji: '📝', desc: 'Notion API' },
-    { type: 'mcp', name: 'vercel', emoji: '▲', desc: 'Deployment' },
-    { type: 'mcp', name: 'supabase', emoji: '⚡', desc: 'Backend' },
+    { type: 'mcp', name: 'shadcn-themes', emoji: '🎭', desc: 'UI Themes' },
+    { type: 'mcp', name: 'playwright', emoji: '🎪', desc: 'Browser Testing' },
+    { type: 'mcp', name: 'neo4j-database', emoji: '🗄️', desc: 'Graph Database' },
+    { type: 'mcp', name: 'filesystem', emoji: '📁', desc: 'File System' },
+    { type: 'mcp', name: 'elevenlabs', emoji: '🎤', desc: 'Text-to-Speech' },
   ];
 
 
@@ -102,7 +96,7 @@ function MainContent() {
     if (item.type === 'agent') {
       command = `npx aicraft install ${item.name}`;
     } else if (item.type === 'mcp') {
-      command = `npx aicraft add-mcp ${item.name}`;
+      command = `npx aicraft mcp install ${item.name}`;
     } else if (item.type === 'doc' && item.subtype === 'install-doc') {
       command = `npx aicraft docs ${item.name}`;
     }
@@ -248,7 +242,7 @@ function MainContent() {
                     {selectedItem.type === 'agent' 
                       ? `npx aicraft install ${selectedItem.name}`
                       : selectedItem.type === 'mcp'
-                      ? `npx aicraft add-mcp ${selectedItem.name}`
+                      ? `npx aicraft mcp install ${selectedItem.name}`
                       : selectedItem.subtype === 'install-doc'
                       ? `npx aicraft docs ${selectedItem.name}`
                       : `# Navigate to ${selectedItem.name} documentation`}
@@ -260,7 +254,7 @@ function MainContent() {
                       if (selectedItem.type === 'agent') {
                         cmd = `npx aicraft install ${selectedItem.name}`;
                       } else if (selectedItem.type === 'mcp') {
-                        cmd = `npx aicraft add-mcp ${selectedItem.name}`;
+                        cmd = `npx aicraft mcp install ${selectedItem.name}`;
                       } else if (selectedItem.subtype === 'install-doc') {
                         cmd = `npx aicraft docs ${selectedItem.name}`;
                       }

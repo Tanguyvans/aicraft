@@ -25,9 +25,9 @@
     },
     "elevenlabs": {
       "name": "elevenlabs",
-      "description": "Text-to-speech, speech-to-text, and AI voice tools",
+      "description": "Text-to-speech and voice AI capabilities with ElevenLabs",
       "type": "stdio",
-      "command": "/Users/tanguyvans/.local/bin/uvx",
+      "command": "uvx",
       "args": ["elevenlabs-mcp"],
       "env": {
         "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"

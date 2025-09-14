@@ -129,6 +129,33 @@
           }
         }
       }
+    },
+    {
+      "name": "elevenlabs",
+      "description": "Text-to-speech and voice AI capabilities with ElevenLabs",
+      "package": "elevenlabs-mcp",
+      "category": "ai",
+      "technologies": ["tts", "voice", "ai", "audio"],
+      "auto_install": false,
+      "required_by": [],
+      "color": "orange",
+      "tags": ["voice", "tts", "ai", "audio", "speech"],
+      "homepage": "https://elevenlabs.io",
+      "installation": {
+        "command": "uvx",
+        "args": ["elevenlabs-mcp"],
+        "config": {
+          "mcpServers": {
+            "elevenlabs": {
+              "command": "uvx",
+              "args": ["elevenlabs-mcp"],
+              "env": {
+                "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

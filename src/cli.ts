@@ -237,6 +237,89 @@ async function getMcpItemRegistry(): Promise<McpItem[]> {
   }
 }
 
+async function processApiKeys(mcpServer: McpServer, mcpName: string): Promise<McpServer> {
+  // Function to extract variable placeholders like ${VARIABLE_NAME}
+  const extractVariables = (text: string): string[] => {
+    const matches = text.match(/\$\{([^}]+)\}/g);
+    return matches ? matches.map(match => match.slice(2, -1)) : [];
+  };
+
+  // Find all variables in env and args
+  const envVariables = new Set<string>();
+  const argsVariables = new Set<string>();
+
+  // Check env variables
+  Object.values(mcpServer.env).forEach(value => {
+    if (typeof value === 'string') {
+      extractVariables(value).forEach(variable => envVariables.add(variable));
+    }
+  });
+
+  // Check args variables
+  mcpServer.args.forEach(arg => {
+    extractVariables(arg).forEach(variable => argsVariables.add(variable));
+  });
+
+  const allVariables = new Set([...envVariables, ...argsVariables]);
+
+  if (allVariables.size === 0) {
+    // No API keys required, return as-is
+    return mcpServer;
+  }
+
+  console.log(chalk.yellow(`\n${mcpName} requires API key configuration:`));
+  
+  const apiKeyValues: Record<string, string> = {};
+
+  // Prompt for each required variable
+  for (const variable of allVariables) {
+    const { value } = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'value',
+        message: `Enter ${variable}:`,
+        mask: '*',
+        validate: (input) => input.trim() !== '' || 'API key cannot be empty',
+      },
+    ]);
+    apiKeyValues[variable] = value;
+  }
+
+  // Create a copy of the server config and replace placeholders
+  const processedServer: McpServer = {
+    ...mcpServer,
+    env: { ...mcpServer.env },
+    args: [...mcpServer.args],
+  };
+
+  // Replace variables in env
+  Object.keys(processedServer.env).forEach(key => {
+    if (typeof processedServer.env[key] === 'string') {
+      Object.entries(apiKeyValues).forEach(([variable, value]) => {
+        processedServer.env[key] = processedServer.env[key].replace(
+          new RegExp(`\\$\\{${variable}\\}`, 'g'),
+          value
+        );
+      });
+    }
+  });
+
+  // Replace variables in args
+  processedServer.args = processedServer.args.map(arg => {
+    let processedArg = arg;
+    Object.entries(apiKeyValues).forEach(([variable, value]) => {
+      processedArg = processedArg.replace(
+        new RegExp(`\\$\\{${variable}\\}`, 'g'),
+        value
+      );
+    });
+    return processedArg;
+  });
+
+  console.log(chalk.green(`✓ API keys configured for ${mcpName}`));
+  return processedServer;
+}
+
 async function installMcps(mcpNames: string[]): Promise<void> {
   if (!mcpNames || mcpNames.length === 0) return;
 
@@ -258,11 +341,14 @@ async function installMcps(mcpNames: string[]): Promise<void> {
   for (const mcpName of mcpNames) {
     const mcpServer = mcpRegistry.mcpServers[mcpName];
     if (mcpServer) {
+      // Process the MCP configuration and prompt for API keys if needed
+      const processedConfig = await processApiKeys(mcpServer, mcpName);
+      
       existingConfig.mcpServers[mcpName] = {
-        type: mcpServer.type,
-        command: mcpServer.command,
-        args: mcpServer.args,
-        env: mcpServer.env,
+        type: processedConfig.type,
+        command: processedConfig.command,
+        args: processedConfig.args,
+        env: processedConfig.env,
       };
     }
   }
@@ -1088,12 +1174,17 @@ async function installMcpItem(mcpItem: McpItem): Promise<void> {
       // Config doesn't exist or is invalid
     }
 
+    // Process the MCP configuration and prompt for API keys if needed
+    spinner.stop();
+    const processedConfig = await processApiKeys(mcpServer, mcpItem.name);
+    spinner.start(`Installing MCP server ${mcpItem.name}...`);
+    
     // Add MCP server configuration
     existingConfig.mcpServers[mcpItem.name] = {
-      type: mcpServer.type,
-      command: mcpServer.command,
-      args: mcpServer.args,
-      env: mcpServer.env,
+      type: processedConfig.type,
+      command: processedConfig.command,
+      args: processedConfig.args,
+      env: processedConfig.env,
     };
 
     // Save updated MCP config
